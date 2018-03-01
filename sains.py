@@ -24,6 +24,7 @@ class SainsburysOfferItem(scrapy.Item):
 	productdesc = Field()
 	offerdesc = Field()
 	producturl = Field()
+	priceunit = Field()
 
 class MySpider(scrapy.Spider):
     def getSainsStartUrl():
@@ -57,6 +58,7 @@ class MySpider(scrapy.Spider):
         product_url='.//div[@class="productInfo"]//h3/a/@href'
         product_desc_tag='.//div[@class="productInfo"]//h3/a/text()'
         product_imgsrc_tag='.//div[@class="productInfo"]//h3/a/img/@src'
+        price_unit_tag = './/div[@class="pricing"]/p[@class="pricePerUnit"]/text()[1]'
         offertags = hxs.xpath(product_grid)
         sainsoffers = []
 
@@ -67,6 +69,7 @@ class MySpider(scrapy.Spider):
             offer['productdesc'] = offertag.xpath(product_desc_tag).extract()[0].replace('  ','').replace('\r\n','')
             offer['offerdesc'] = offertag.xpath(offer_desc_tag).extract()[0].replace('  ','').replace('\r\n','')
             offer['producturl'] = offertag.xpath(product_url).extract()[0]
+            offer['priceunit'] = offertag.xpath(price_unit_tag).extract()[0].replace('  ','').replace('\r\n','').replace('\n','')
             sainsoffers.append(offer)
         return sainsoffers
 
