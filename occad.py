@@ -13,7 +13,7 @@ import os
 # logger = logging.getLogger(__name__)
 
 
-class MorrisonsOfferItem(scrapy.Item):
+class OccadoOfferItem(scrapy.Item):
     imgsrcl = Field()
     productdesc = Field()
     offerdesc = Field()
@@ -23,13 +23,12 @@ class MorrisonsOfferItem(scrapy.Item):
     unitprice = Field()
 
 
-class MorrisonsSpider(scrapy.Spider):
+class OccadoSpider(scrapy.Spider):
     def getChildCatUrls():
-        categories = ['104268', '102210', '104162', '102705', '103644', '103120', '102063', '166274', '103497', '102838', '166275', '103423', '102207', '150516', '153052']
-        # categories = ['104268', '104162']
-        # categories = [104268]
-        base_url = 'https://groceries.morrisons.com'
-        base_cat_url = base_url + '/webshop/subNavigation?catalogueType=OFFER_PRODUCTS&tags=|105651|19998|%s'
+        # categories = ['20002', '20424', '25189', '20911', '20977', '43510', '30932', '21584', '36203', '21276', '30489', '30930', '136434', '30931', '36202', '196461', '30941', '190566']
+        categories = ['20002']
+        base_url = 'https://www.ocado.com/'
+        base_cat_url = base_url + '/webshop/subNavigation?catalogueType=OFFER_PRODUCTS&tags=|20000|19998|%s'
 
         cat_url = {}
         starturls = []
@@ -58,8 +57,8 @@ class MorrisonsSpider(scrapy.Spider):
         # logger.info(starturls)
         return starturls
 
-    name = "morrioffer"  # Name of the spider, to be used when crawling
-    allowed_domains = ["morrisons.com"]  # Where the spider is allowed to go
+    name = "occadoffer"  # Name of the spider, to be used when crawling
+    allowed_domains = ["occado.com"]  # Where the spider is allowed to go
     # start_urls = ['https://groceries.morrisons.com/webshop/getOfferProducts.do?tags=|105651|19998|104268|113925|113955&Asidebar=2']
     start_urls = getChildCatUrls()
 
@@ -75,10 +74,10 @@ class MorrisonsSpider(scrapy.Spider):
         unit_price = './/div[@class="fop-item"]//div[@class="price-group-wrapper"]/span[@class="fop-unit-price"]/text()'
         offertags = hxs.xpath(product_grid)
 
-        morrioffers = []
-        base_url = 'https://groceries.morrisons.com'
+        occadoffers = []
+        base_url = 'https://www.occado.com'
         for offertag in offertags:
-            offer = MorrisonsOfferItem()
+            offer = OccadoOfferItem()
             offer['imgsrcl'] = base_url + offertag.xpath(img_src).extract_first()
             offer['productdesc'] = offertag.xpath(prod_desc).extract_first().replace('  ', '').replace('\r\n', '').replace('\n', '')
             offer['offerdesc'] = offertag.xpath(promo_desc).extract_first().replace('  ', '').replace('\r\n', '').replace('\n', '')
@@ -86,13 +85,13 @@ class MorrisonsSpider(scrapy.Spider):
             offer['offerurl'] = base_url + offertag.xpath(promo_url).extract_first()
             offer['productprice'] = offertag.xpath(price).extract_first().replace('  ', '').replace('\r\n', '').replace('\n', '')
             offer['unitprice'] = offertag.xpath(unit_price).extract_first()
-            morrioffers.append(offer)
+            occadoffers.append(offer)
 
-        return morrioffers
+        return occadoffers
 
 
-FILE_NAME = '/opt/offers/MORRI_' + datetime.now().strftime("%Y%m%d") + '.json'
-LOG_FILE_NAME = '/opt/offers/logs/MORRI_' + datetime.now().strftime("%Y%m%d") + '.log'
+FILE_NAME = '/opt/offers/OCCAD_' + datetime.now().strftime("%Y%m%d") + '.json'
+LOG_FILE_NAME = '/opt/offers/logs/OCCAD_' + datetime.now().strftime("%Y%m%d") + '.log'
 try:
     os.remove(FILE_NAME)
 except OSError:
@@ -111,5 +110,5 @@ SETTINGS = {
 
 
 process = CrawlerProcess(SETTINGS)
-process.crawl(MorrisonsSpider)
+process.crawl(OccadoSpider)
 process.start()
