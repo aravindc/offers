@@ -1,68 +1,65 @@
 import os
 import scrapy
 import logging
-import json
 import requests
 import lxml.html
 import math
 from scrapy.crawler import CrawlerProcess
 from scrapy.selector import Selector
-from scrapy.item import Item, Field
-from scrapy.exporters import JsonItemExporter
-from urllib.parse import urlsplit, parse_qs
+from scrapy.item import Field
 from datetime import datetime
 
+
 class TescoOfferItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-	productid = Field()
-	imgsrc90 = Field()
-	imgsrc110 = Field()
-	imgsrc540 = Field()
-	imgsrc225 = Field()
-	productdesc = Field()
-	offerdesc = Field()
-	validitydesc = Field()
-	offerStart = Field()
-	offerEnd = Field()
+    productid = Field()
+    imgsrc90 = Field()
+    imgsrc110 = Field()
+    imgsrc540 = Field()
+    imgsrc225 = Field()
+    productdesc = Field()
+    offerdesc = Field()
+    validitydesc = Field()
+    offerStart = Field()
+    offerEnd = Field()
+
 
 class TescoOfferSpider(scrapy.Spider):
     def getTescoStartUrl():
         tesco_start_url = []
-        r  = requests.get('https://www.tesco.com/groceries/en-GB/promotions/alloffers')
+        r = requests.get('https://www.tesco.com/groceries/en-GB/promotions/alloffers')
         data = lxml.html.fromstring(r.text)
         output = data.xpath('//div[@class="items-count__filter-caption"]//text()')
-        if (len(output)==0):
+        if (len(output) == 0):
             output = data.xpath('//span[@class="items-count__filter-caption"]/text()')
             itemcount = output[0].split(' ')
         else:
             itemcount = output[3].split(' ')
-        print(math.ceil(int(itemcount[0])/24))
+        print(math.ceil(int(itemcount[0]) / 24))
         #    return math.ceil(int(itemcount[0])/24)
-        maxpage = math.ceil(int(itemcount[0])/24)
+        maxpage = math.ceil(int(itemcount[0]) / 24)
         tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?page=%d'
-        for i in range(1,maxpage):
+        for i in range(1, maxpage):
             tesco_start_url.append(tescourl % i)
         return tesco_start_url
 
-        #output = data.xpath('//span[@class="items-count-filter-caption"]/text()')
+        # output = data.xpath('//span[@class="items-count-filter-caption"]/text()')
         output = data.xpath('//div[@class="items-count__filter-caption"]//text()')
         logging.info(output)
         itemcount = output[3].split(' ')
-        print(math.ceil(int(itemcount[0])/24))
+        print(math.ceil(int(itemcount[0]) / 24))
         #    return math.ceil(int(itemcount[0])/24)
-        maxpage = math.ceil(int(itemcount[0])/24)
+        maxpage = math.ceil(int(itemcount[0]) / 24)
         tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?page=%d'
-        for i in range(1,maxpage):
+        for i in range(1, maxpage):
             tesco_start_url.append(tescourl % i)
         return tesco_start_url
-    name = "tescooffer" # Name of the spider, to be used when crawling
-    allowed_domains = ["tesco.com"] # Where the spider is allowed to go
+    name = "tescooffer"  # Name of the spider, to be used when crawling
+    allowed_domains = ["tesco.com"]  # Where the spider is allowed to go
     start_urls = getTescoStartUrl()
-    #start_urls = ['https://www.tesco.com/groceries/en-GB/promotions/alloffers?page=1']
+    # start_urls = ['https://www.tesco.com/groceries/en-GB/promotions/alloffers?page=1']
 
     def parse(self, response):
-        hxs = Selector(response) # The XPath selector
+        hxs = Selector(response)  # The XPath selector
 
         # XPath Tags
         productlist_tag = '//div[@class="product-lists"]//ul[@class="product-list grid"]/li'
@@ -77,12 +74,12 @@ class TescoOfferSpider(scrapy.Spider):
         tescooffers = []
         for offertag in offertags:
             offer = TescoOfferItem()
-            offer['productid'] = offertag.xpath(product_id_tag).extract()[0].replace("/groceries/en-GB/products/","")
+            offer['productid'] = offertag.xpath(product_id_tag).extract()[0].replace("/groceries/en-GB/products/", "")
             if offertag.xpath(product_imgsrc_tag).extract():
                 offer['imgsrc225'] = offertag.xpath(product_imgsrc_tag).extract()[0]
-                offer['imgsrc110'] = offertag.xpath(product_imgsrc_tag).extract()[0].replace('225x225','110x110')
-                offer['imgsrc90'] = offertag.xpath(product_imgsrc_tag).extract()[0].replace('225x225','90x90')
-                offer['imgsrc540'] = offertag.xpath(product_imgsrc_tag).extract()[0].replace('225x225','540x540')
+                offer['imgsrc110'] = offertag.xpath(product_imgsrc_tag).extract()[0].replace('225x225', '110x110')
+                offer['imgsrc90'] = offertag.xpath(product_imgsrc_tag).extract()[0].replace('225x225', '90x90')
+                offer['imgsrc540'] = offertag.xpath(product_imgsrc_tag).extract()[0].replace('225x225', '540x540')
             else:
                 offer['imgsrc90'] = ""
                 offer['imgsrc540'] = ""
@@ -101,10 +98,11 @@ class TescoOfferSpider(scrapy.Spider):
             else:
                 offer['validitydesc'] = ""
             tescooffers.append(offer)
-        return tescooffers # To be changed later
+        return tescooffers  # To be changed later
 
-FILE_NAME='/opt/offers/TESC_'+datetime.now().strftime("%Y%m%d")+'.json'
-LOG_FILE_NAME='/opt/offers/logs/TESC_'+datetime.now().strftime("%Y%m%d")+'.log'
+
+FILE_NAME = '/opt/offers/TESC_' + datetime.now().strftime("%Y%m%d") + '.json'
+LOG_FILE_NAME = '/opt/offers/logs/TESC_' + datetime.now().strftime("%Y%m%d") + '.log'
 try:
     os.remove(FILE_NAME)
 except OSError:
@@ -123,4 +121,3 @@ SETTINGS = {
 process = CrawlerProcess(SETTINGS)
 process.crawl(TescoOfferSpider)
 process.start()
-
