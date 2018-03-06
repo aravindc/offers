@@ -25,29 +25,57 @@ def connect():
     return conxn
 
 
-def insert_data(conxn, tabname, json_file):
+def sains_ins_data(conxn, json_file):
     try:
         cursor = conxn.cursor()
         json_data = open(json_file).read()
         temp_str = os.path.splitext(json_file)[0]
         end = None
         ins_dt = temp_str[temp_str.find('_') + 1:end]
-        if tabname == 'tesco':
-            qrystr = """INSERT INTO tesco(productid, imgsrcl, productdesc, producturl) VALUES(%s, %s, %s, %s)"""
-        elif tabname == 'sains':
-            qrystr = """INSERT INTO sains(productid, imgsrcl, productdesc, producturl, priceunit, offerdesc, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s)"""
-            for item in json.loads(json_data):
-                logger.debug(item)
-                if 'priceunit' not in item:
-                    item['priceunit'] = 0
-                cursor.execute(qrystr, (item['productid'], 'https:' + item['imgsrcl'], item['productdesc'], item['producturl'], item['priceunit'], item['offerdesc'], ins_dt))
-            conxn.commit()
+        qrystr = """INSERT INTO sains(productid, imgsrcl, productdesc, producturl, priceunit, offerdesc, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s)"""
+        for item in json.loads(json_data):
+            if 'priceunit' not in item:
+                item['priceunit'] = 0
+            cursor.execute(qrystr, (item['productid'], 'https:' + item['imgsrcl'], item['productdesc'], item['producturl'], item['priceunit'], item['offerdesc'], ins_dt))
+        conxn.commit()
     except Error as e:
-        print('Error:', e)
+        logger.error(e)
     finally:
         cursor.close()
-        conxn.close()
-        logger.info('Cursor & Connection closed')
+
+
+def tesc_ins_data(conxn, json_file):
+    try:
+        cursor = conxn.cursor()
+        json_data = open(json_file).read()
+        temp_str = os.path.splitext(json_file)[0]
+        end = None
+        ins_dt = temp_str[temp_str.find('_') + 1:end]
+        qrystr = """INSERT INTO tesco(productid, productdesc, offerdesc, validitydesc, imgsrc90, imgsrc110, imgsrc225, imgsrc540, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        for item in json.loads(json_data):
+            cursor.execute(qrystr, item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt)
+        conxn.commit()
+    except Error as e:
+        logger.error(e)
+    finally:
+        cursor.close()
+
+
+def morri_ins_data(conxn, json_file):
+    try:
+        cursor = conxn.cursor()
+        json_data = open(json_file).read()
+        temp_str = os.path.splitext(json_file)[0]
+        end = None
+        ins_dt = temp_str[temp_str.find('_') + 1:end]
+        qrystr = """INSERT INTO morri(productid, productdesc, offerdesc, validitydesc, imgsrc90, imgsrc110, imgsrc225, imgsrc540, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        for item in json.loads(json_data):
+            cursor.execute(qrystr, item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt)
+        conxn.commit()
+    except Error as e:
+        logger.error(e)
+    finally:
+        cursor.close()
 
 
 def get_file_name(conxn, tabname):
@@ -55,14 +83,28 @@ def get_file_name(conxn, tabname):
         cursor = conxn.cursor()
         if tabname == 'tesco':
             qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from tesco"""
+            cursor.execute(qrystr)
+            row = cursor.fetchone()
+            retval = row[0]
+            logger.info(retval)
+            if retval is None:
+                retval = '20180215'
         elif tabname == 'sains':
             qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from sains"""
-        cursor.execute(qrystr)
-        row = cursor.fetchone()
-        retval = row[0]
-        logger.info(retval)
-        if retval is  None:
-            retval = '20180215'
+            cursor.execute(qrystr)
+            row = cursor.fetchone()
+            retval = row[0]
+            logger.info(retval)
+            if retval is None:
+                retval = '20180215'
+        elif tabname == 'morri':
+            qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from morri"""
+            cursor.execute(qrystr)
+            row = cursor.fetchone()
+            retval = row[0]
+            logger.info(retval)
+            if retval is None:
+                retval = '20180220'
     except Error as e:
         logger.error(e)
     finally:
@@ -73,10 +115,10 @@ def get_file_name(conxn, tabname):
 
 if __name__ == '__main__':
     conx = connect()
-    json_file = '/opt/offers/SAINS_'+get_file_name(conx, 'sains')+'.json'
-    logger.info('working on '+json_file+' ...')
+    json_file = '/opt/offers/SAINS_' + get_file_name(conx, 'sains') + '.json'
+    logger.info('working on ' + json_file + ' ...')
     if os.path.isfile(json_file):
-        insert_data(conx, 'sains', json_file)
+        sains_ins_data(conx, json_file)
     else:
-        logger.error('File: '+json_file+' not found...')
+        logger.error('File: ' + json_file + ' not found...')
     conx.close()
