@@ -78,30 +78,18 @@ class OccadoSpider(scrapy.Spider):
         base_url = 'https://www.occado.com'
         for offertag in offertags:
             offer = OccadoOfferItem()
-            if offer['imgsrcl'] is None:
-                offer['imgsrcl'] = ''
-            else:
-                offer['imgsrcl'] = base_url + offertag.xpath(img_src).extract_first()
-            if offer['productdesc'] is None:
-                offer['productdesc'] = ''
-            else:
-                offer['productdesc'] = offertag.xpath(prod_desc).extract_first().replace('  ', '').replace('\r\n', '').replace('\n', '')
-            if offer['offerdesc'] is None:
-                offer['offerdesc'] = ''
-            else:
-                offer['offerdesc'] = offertag.xpath(promo_desc).extract_first().replace('  ', '').replace('\r\n', '').replace('\n', '')
-            if offer['producturl'] is None:
-                offer['producturl'] = ''
-            else:
-                offer['producturl'] = base_url + offertag.xpath(prod_url).extract_first()
-            if offer['offerurl'] is None:
-                offer['offerurl'] = ''
-            else:
-                offer['offerurl'] = base_url + offertag.xpath(promo_url).extract_first()
-            if offer['productprice'] is None:
-                offer['productprice'] = ''
-            else:
-                offer['productprice'] = offertag.xpath(price).extract_first().replace('  ', '').replace('\r\n', '').replace('\n', '')
+            offer['imgsrcl'] = base_url + offertag.xpath(img_src).extract_first()
+            offer['productdesc'] = offertag.xpath(prod_desc).extract_first()
+            if offer['productdesc'] is not None:
+                offer['productdesc'] = offer['productdesc'].replace('  ', '').replace('\r\n', '').replace('\n', '')
+            offer['offerdesc'] = offertag.xpath(promo_desc).extract_first()
+            if offer['offerdesc'] is not None:
+                offer['offerdesc'] = offer['offerdesc'].replace('  ', '').replace('\r\n', '').replace('\n', '')
+            offer['producturl'] = base_url + offertag.xpath(prod_url).extract_first()
+            offer['offerurl'] = base_url + offertag.xpath(promo_url).extract_first()
+            offer['productprice'] = offertag.xpath(price).extract_first()
+            if offer['productprice'] is not None:
+                offer['productprice'] = offer['productprice'].replace('  ', '').replace('\r\n', '').replace('\n', '')
             offer['unitprice'] = offertag.xpath(unit_price).extract_first()
             occadoffers.append(offer)
 
