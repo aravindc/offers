@@ -55,7 +55,7 @@ def tesc_ins_data(conxn, json_file):
         ins_dt = temp_str[temp_str.find('_') + 1:end]
         qrystr = """INSERT INTO tesco(productid, productdesc, offerdesc, validitydesc, imgsrc90, imgsrc110, imgsrc225, imgsrc540, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         for item in json.loads(json_data):
-            cursor.execute(qrystr, item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt)
+            cursor.execute(qrystr, (item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt))
         conxn.commit()
     except Error as e:
         logger.error(e)
@@ -72,7 +72,7 @@ def morri_ins_data(conxn, json_file):
         ins_dt = temp_str[temp_str.find('_') + 1:end]
         qrystr = """INSERT INTO morri(productid, productdesc, offerdesc, validitydesc, imgsrc90, imgsrc110, imgsrc225, imgsrc540, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         for item in json.loads(json_data):
-            cursor.execute(qrystr, item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt)
+            cursor.execute(qrystr, (item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt))
         conxn.commit()
     except Error as e:
         logger.error(e)
@@ -89,7 +89,7 @@ def occad_ins_data(conxn, json_file):
         ins_dt = temp_str[temp_str.find('_') + 1:end]
         qrystr = """INSERT INTO occad(productid, productdesc, offerdesc, validitydesc, imgsrc90, imgsrc110, imgsrc225, imgsrc540, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         for item in json.loads(json_data):
-            cursor.execute(qrystr, item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt)
+            cursor.execute(qrystr, (item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt))
         conxn.commit()
     except Error as e:
         logger.error(e)
@@ -151,9 +151,9 @@ if __name__ == '__main__':
     elif args['type'] == 'sains':
         json_file = '/opt/offers/SAINS_' + get_file_name(conx, 'sains') + '.json'
     elif args['type'] == 'morri':
-        json_file = '/opt/offers/SAINS_' + get_file_name(conx, 'morri') + '.json'
+        json_file = '/opt/offers/MORRI_' + get_file_name(conx, 'morri') + '.json'
     elif args['type'] == 'occad':
-        json_file = '/opt/offers/SAINS_' + get_file_name(conx, 'occad') + '.json'
+        json_file = '/opt/offers/OCCAD_' + get_file_name(conx, 'occad') + '.json'
     else:
         logger.error("Invalid retailer name provided")
         conx.close()
