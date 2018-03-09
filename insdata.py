@@ -70,9 +70,9 @@ def morri_ins_data(conxn, json_file):
         temp_str = os.path.splitext(json_file)[0]
         end = None
         ins_dt = temp_str[temp_str.find('_') + 1:end]
-        qrystr = """INSERT INTO morri(productid, productdesc, offerdesc, validitydesc, imgsrc90, imgsrc110, imgsrc225, imgsrc540, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        qrystr = """INSERT INTO morri(productdesc, producturl, offerdesc, offerurl, imgsrcl, unitprice, productprice, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"""
         for item in json.loads(json_data):
-            cursor.execute(qrystr, (item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt))
+            cursor.execute(qrystr, (item['productdesc'], item['producturl'], item['offerdesc'], item['offerurl'], item['imgsrcl'], item['unitprice'], item['productprice'], ins_dt))
         conxn.commit()
     except Error as e:
         logger.error(e)
@@ -87,9 +87,9 @@ def occad_ins_data(conxn, json_file):
         temp_str = os.path.splitext(json_file)[0]
         end = None
         ins_dt = temp_str[temp_str.find('_') + 1:end]
-        qrystr = """INSERT INTO occad(productid, productdesc, offerdesc, validitydesc, imgsrc90, imgsrc110, imgsrc225, imgsrc540, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        qrystr = """INSERT INTO occad(productdesc, producturl, offerdesc, offerurl, imgsrcl, unitprice, productprice, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"""
         for item in json.loads(json_data):
-            cursor.execute(qrystr, (item['productid'], item['productdesc'], item['offerdesc'], item['validitydesc'], item['imgsrc90'], item['imgsrc110'], item['imgsrc225'], item['imgsrc540'], ins_dt))
+            cursor.execute(qrystr, (item['productdesc'], item['producturl'], item['offerdesc'], item['offerurl'], item['imgsrcl'], item['unitprice'], item['productprice'], ins_dt))
         conxn.commit()
     except Error as e:
         logger.error(e)
