@@ -2,3 +2,4 @@ logs
 *.json
 *.ini
 __pycache__
+.ipynb*
