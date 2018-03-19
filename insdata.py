@@ -1,6 +1,6 @@
 from mysql.connector import MySQLConnection
 from mysql.connector import Error
-from dbconfig import read_db_config
+from dbconfig import read_mysql_config
 import logging
 import os
 import os.path
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def connect():
     """ Connect to Mysql databse """
-    db_config = read_db_config()
+    db_config = read_mysql_config()
     try:
         conxn = MySQLConnection(**db_config)
         if conxn.is_connected():

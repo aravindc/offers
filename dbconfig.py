@@ -1,13 +1,14 @@
 from configparser import ConfigParser
 import logging
+import os.path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def read_db_config(filename='/opt/offers/config.ini', section='mysql'):
+def read_mysql_config(filename='config.ini', section='mysql'):
     parser = ConfigParser()
-    parser.read(filename)
+    parser.read([os.path.expanduser(filename)])
     db = {}
     if parser.has_section(section):
         items = parser.items(section)
@@ -17,3 +18,18 @@ def read_db_config(filename='/opt/offers/config.ini', section='mysql'):
         raise Exception('{0} not found in the {1} file'.format(section, filename))
     return db
 
+
+def read_pg_config(filename='config.ini', section='pgsql'):
+    #  create a parser
+    parser = ConfigParser()
+    #  read config file
+    parser.read(os.path.expanduser(filename))
+    #  get section, default to postgresql
+    db = {}
+    if parser.has_section(section):
+        params = parser.items(section)
+        for param in params:
+            db[param[0]] = param[1]
+    else:
+        raise Exception('Section {0} not found in the {1} file'.format(section, filename))
+    return db
