@@ -45,7 +45,7 @@ def get_file_name(conxn, tabname):
     try:
         cursor = conxn.cursor()
         if tabname == 'tesco':
-            qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from tesco"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from tesco"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
@@ -53,7 +53,7 @@ def get_file_name(conxn, tabname):
             if retval is None:
                 retval = '20180215'
         elif tabname == 'sainsburys':
-            qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from sainsburys"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from sainsburys"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
@@ -61,7 +61,7 @@ def get_file_name(conxn, tabname):
             if retval is None:
                 retval = '20180215'
         elif tabname == 'morrison':
-            qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from morrison"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from morrison"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
@@ -69,7 +69,7 @@ def get_file_name(conxn, tabname):
             if retval is None:
                 retval = '20180220'
         elif tabname == 'ocado':
-            qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from ocado"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from ocado"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
