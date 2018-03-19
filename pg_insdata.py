@@ -87,21 +87,21 @@ def get_file_name(conxn, tabname):
 def ins_data(conxn, type, json_file):
     try:
         cursor = conxn.cursor()
-        json_data = open(json_file).read()
+        #  json_data = open(json_file).read()
         temp_str = os.path.splitext(json_file)[0]
         end = None
         ins_dt = temp_str[temp_str.find('_') + 1:end]
 
-
-
-
-
-
-        qrystr = """INSERT INTO occad(productdesc, producturl, offerdesc, offerurl, imgsrcl, unitprice, productprice, ins_ts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"""
-        for item in json.loads(json_data):
-            cursor.execute(qrystr, (item['productdesc'], item['producturl'], item['offerdesc'], item['offerurl'], item['imgsrcl'], item['unitprice'], item['productprice'], ins_dt))
+        qrystrs = ("""create table temptab1(values text)""",
+                   """copy temptab1 from '""" + json_file + """' """,
+                   """delete from temptab1 where values='[' or values=']'""",
+                   """insert into """ + type + """ select md5(random()::text || clock_timestamp()::text)::uuid, replace(values,'},','}')::json,'"""
+                   + ins_dt + """' as values from temptab1""",
+                   """drop table if exists temptab1""")
+        for qrystr in qrystrs:
+            cursor.execute(qrystr)
         conxn.commit()
-    except Error as e:
+    except Exception as e:
         logger.error(e)
     finally:
         cursor.close()
