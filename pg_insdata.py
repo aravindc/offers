@@ -95,14 +95,23 @@ def ins_data(conxn, type, json_file):
         end = None
         ins_dt = temp_str[temp_str.find('_') + 1:end]
 
+        # Read in the file
+        with open(json_file, 'r') as file:
+            filedata = file.read()
+        # Replace the target string
+        filedata = filedata.replace('\"', '')
+
+        # Write the file out again
+        with open(json_file, 'w') as file:
+            file.write(filedata)
+
         qrystrs = ("""drop table if exists temptab1""",
                    """create table temptab1(values text)""",
                    """copy temptab1 from '""" + json_file + """' """,
                    """delete from temptab1 where values='[' or values=']'""",
-                   """insert into """ + type + """ select md5(random()::text ||
-                       clock_timestamp()::text)::uuid, replace(replace(
-                       values,'\"',''),'},','}')::json,'"""
-                   + ins_dt + """' as values from temptab1""",
+                   """insert into """ + type + """ select md5(random()::text
+                   ||clock_timestamp()::text)::uuid, replace(values,'},','}'
+                   )::json,'""" + ins_dt + """' as values from temptab1""",
                    """drop table if exists temptab1""")
         for qrystr in qrystrs:
             cursor.execute(qrystr)
