@@ -5,7 +5,6 @@ import os
 import os.path
 import argparse
 import sys
-import json
 
 
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +44,8 @@ def get_file_name(conxn, tabname):
     try:
         cursor = conxn.cursor()
         if tabname == 'tesco':
-            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from tesco"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day',
+               'YYYYMMDD') as insdt from tesco"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
@@ -53,7 +53,8 @@ def get_file_name(conxn, tabname):
             if retval is None:
                 retval = '20180215'
         elif tabname == 'sainsburys':
-            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from sainsburys"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day',
+               'YYYYMMDD') as insdt from sainsburys"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
@@ -61,7 +62,8 @@ def get_file_name(conxn, tabname):
             if retval is None:
                 retval = '20180215'
         elif tabname == 'morrison':
-            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from morrison"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day',
+               'YYYYMMDD') as insdt from morrison"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
@@ -69,7 +71,8 @@ def get_file_name(conxn, tabname):
             if retval is None:
                 retval = '20180220'
         elif tabname == 'ocado':
-            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day','YYYYMMDD') as insdt from ocado"""
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day',
+               'YYYYMMDD') as insdt from ocado"""
             cursor.execute(qrystr)
             row = cursor.fetchone()
             retval = row[0]
@@ -95,7 +98,9 @@ def ins_data(conxn, type, json_file):
         qrystrs = ("""create table temptab1(values text)""",
                    """copy temptab1 from '""" + json_file + """' """,
                    """delete from temptab1 where values='[' or values=']'""",
-                   """insert into """ + type + """ select md5(random()::text || clock_timestamp()::text)::uuid, replace(values,'},','}')::json,'"""
+                   """insert into """ + type + """ select md5(random()::text ||
+                       clock_timestamp()::text)::uuid, replace(values,'},','}'
+                       )::json,'"""
                    + ins_dt + """' as values from temptab1""",
                    """drop table if exists temptab1""")
         for qrystr in qrystrs:
@@ -111,21 +116,27 @@ if __name__ == '__main__':
     try:
         conx = connect()
         parser = argparse.ArgumentParser()
-        parser.add_argument('-t', '--type', help='Retailer name', required=True)
+        parser.add_argument('-t', '--type', help='Retailer name',
+                            required=True)
         args = vars(parser.parse_args())
         if args['type'] == 'tesco':
-            json_file = os.path.expanduser('TESC_' + get_file_name(conx, args['type']) + '.json')
+            json_file = os.path.abspath('TESC_' + get_file_name(conx,
+                                        args['type']) + '.json')
         elif args['type'] == 'sainsburys':
-            json_file = os.path.expanduser('SAINS_' + get_file_name(conx, args['type']) + '.json')
+            json_file = os.path.abspath('SAINS_' + get_file_name(conx,
+                                        args['type']) + '.json')
         elif args['type'] == 'morrison':
-            json_file = os.path.expanduser('MORRI_' + get_file_name(conx, args['type']) + '.json')
+            json_file = os.path.abspath('MORRI_' + get_file_name(conx,
+                                        args['type']) + '.json')
         elif args['type'] == 'ocado':
-            json_file = os.path.expanduser('OCCAD_' + get_file_name(conx, args['type']) + '.json')
+            json_file = os.path.abspath('OCCAD_' + get_file_name(conx,
+                                        args['type']) + '.json')
         else:
             logger.error("Invalid retailer name provided")
             conx.close()
             sys.exit(0)
         logger.info('working on ' + json_file + ' ...')
+        logger.info(json_file)
         if os.path.isfile(json_file):
             ins_data(conx, args['type'], json_file)
         else:
