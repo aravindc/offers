@@ -78,7 +78,7 @@ def get_file_name(conxn, tabname):
             retval = row[0]
             logger.info(retval)
             if retval is None:
-                retval = '20180304'
+                retval = '20180308'
     except Exception as e:
         logger.error(e)
     finally:
@@ -90,25 +90,40 @@ def get_file_name(conxn, tabname):
 def ins_data(conxn, type, json_file):
     try:
         cursor = conxn.cursor()
-        #  json_data = open(json_file).read()
         temp_str = os.path.splitext(json_file)[0]
         end = None
         ins_dt = temp_str[temp_str.find('_') + 1:end]
 
-        qrystrs = ("""create table temptab1(values text)""",
-                   """copy temptab1 from '""" + json_file + """' """,
+        logger.info(json_file)
+        # Read in the file
+        with open(json_file, 'r', encoding='utf-8') as file:
+            filedata = file.read()
+        # Replace the target string
+        filedata = filedata.replace('\\"', '')
+        # Write the file out again
+        output_file = os.path.abspath('temp_file.out')
+        with open(output_file, 'w', encoding='utf-8') as file:
+            file.write(filedata)
+
+        qrystrs = ("""drop table if exists temptab1""",
+                   """create table temptab1(values text)""",
+                   """copy temptab1 from '""" + output_file + """' """,
                    """delete from temptab1 where values='[' or values=']'""",
-                   """insert into """ + type + """ select md5(random()::text ||
-                       clock_timestamp()::text)::uuid, replace(values,'},','}'
-                       )::json,'"""
-                   + ins_dt + """' as values from temptab1""",
+                   """insert into """ + type + """ select md5(random()::text
+                   ||clock_timestamp()::text)::uuid, replace(values,'},','}'
+                   )::json,'""" + ins_dt + """' as values from temptab1""",
                    """drop table if exists temptab1""")
+
         for qrystr in qrystrs:
             cursor.execute(qrystr)
         conxn.commit()
     except Exception as e:
         logger.error(e)
     finally:
+        try:
+            os.remove(output_file)
+        except OSError:
+            pass
         cursor.close()
 
 
