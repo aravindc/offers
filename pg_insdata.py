@@ -99,7 +99,7 @@ def ins_data(conxn, type, json_file):
         with open(json_file, 'r', encoding='utf-8') as file:
             filedata = file.read()
         # Replace the target string
-        filedata = filedata.replace('\"', '')
+        filedata = filedata.replace('\\"', '')
 
         # Write the file out again
         with open(json_file, 'w', encoding='utf-8') as file:
