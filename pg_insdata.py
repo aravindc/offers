@@ -96,13 +96,13 @@ def ins_data(conxn, type, json_file):
         ins_dt = temp_str[temp_str.find('_') + 1:end]
 
         # Read in the file
-        with open(json_file, 'r') as file:
+        with open(json_file, 'r', encoding='utf-8') as file:
             filedata = file.read()
         # Replace the target string
         filedata = filedata.replace('\"', '')
 
         # Write the file out again
-        with open(json_file, 'w') as file:
+        with open(json_file, 'w', encoding='utf-8') as file:
             file.write(filedata)
 
         qrystrs = ("""drop table if exists temptab1""",
