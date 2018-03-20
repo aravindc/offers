@@ -120,6 +120,10 @@ def ins_data(conxn, type, json_file):
     except Exception as e:
         logger.error(e)
     finally:
+        try:
+            os.remove(output_file)
+        except OSError:
+            pass
         cursor.close()
 
 
