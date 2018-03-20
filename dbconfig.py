@@ -15,7 +15,8 @@ def read_mysql_config(filename='config.ini', section='mysql'):
         for item in items:
             db[item[0]] = item[1]
     else:
-        raise Exception('{0} not found in the {1} file'.format(section, filename))
+        raise Exception('{0} not found in the {1} file'.format(section,
+                        filename))
     return db
 
 
@@ -31,5 +32,6 @@ def read_pg_config(filename='config.ini', section='pgsql'):
         for param in params:
             db[param[0]] = param[1]
     else:
-        raise Exception('Section {0} not found in the {1} file'.format(section, filename))
+        raise Exception('Section {0} not found in the {1} file'.format(section,
+                        filename))
     return db
