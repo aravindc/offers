@@ -78,7 +78,7 @@ def get_file_name(conxn, tabname):
             retval = row[0]
             logger.info(retval)
             if retval is None:
-                retval = '20180304'
+                retval = '20180308'
     except Exception as e:
         logger.error(e)
     finally:
