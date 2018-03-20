@@ -120,6 +120,7 @@ if __name__ == '__main__':
                             required=True)
         args = vars(parser.parse_args())
         if args['type'] == 'tesco':
+<<<<<<< HEAD
             json_file = os.path.abspath('TESC_' + get_file_name(conx,
                                         args['type']) + '.json')
         elif args['type'] == 'sainsburys':
@@ -131,6 +132,19 @@ if __name__ == '__main__':
         elif args['type'] == 'ocado':
             json_file = os.path.abspath('OCCAD_' + get_file_name(conx,
                                         args['type']) + '.json')
+=======
+            json_file = os.path.expanduser('TESC_' + get_file_name(conx,
+                                           args['type']) + '.json')
+        elif args['type'] == 'sainsburys':
+            json_file = os.path.expanduser('SAINS_' + get_file_name(conx,
+                                           args['type']) + '.json')
+        elif args['type'] == 'morrison':
+            json_file = os.path.expanduser('MORRI_' + get_file_name(conx,
+                                           args['type']) + '.json')
+        elif args['type'] == 'ocado':
+            json_file = os.path.expanduser('OCCAD_' + get_file_name(conx,
+                                           args['type']) + '.json')
+>>>>>>> 8b2f7df161f41429ccbfe82635bb0743c4c8ca6c
         else:
             logger.error("Invalid retailer name provided")
             conx.close()
