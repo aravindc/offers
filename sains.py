@@ -1,13 +1,11 @@
 import os
 import scrapy
-import json
 import requests
 import lxml.html
 import math
 from scrapy.crawler import CrawlerProcess
 from scrapy.selector import Selector
-from scrapy.item import Item, Field
-from scrapy.exporters import JsonItemExporter
+from scrapy.item import Field
 from urllib.parse import urlsplit, parse_qs
 from datetime import datetime
 
@@ -43,7 +41,9 @@ class MySpider(scrapy.Spider):
             output = data.xpath('//h1[@id="resultsHeading"]/text()')
             # item = output[0].replace('  ', '')
             # .replace('\r\n', '').split('(')[0]
-            itemcount = output[0].replace('  ', '').replace('\r\n', '').split('(')[1].split(' ')[0]
+            itemcount = output[0].replace('  ', '') \
+                                 .replace('\r\n', '') \
+                                 .split('(')[1].split(' ')[0]
             for i in range(0, math.ceil(int(itemcount.replace(',', ''))/108)):
                 sains_start_url.append(urlstring % (n, n, i*108))
         return sains_start_url
@@ -75,10 +75,17 @@ class MySpider(scrapy.Spider):
                                           .xpath(product_id_tag).extract()[0])
                                           .query)['productId'][0]
             offer['imgsrcl'] = offertag.xpath(product_imgsrc_tag).extract()[0]
-            offer['productdesc'] = offertag.xpath(product_desc_tag).extract()[0].replace('  ', '').replace('\r\n', '')
-            offer['offerdesc'] = offertag.xpath(offer_desc_tag).extract()[0].replace('  ', '').replace('\r\n', '')
+            offer['productdesc'] = offertag.xpath(product_desc_tag) \
+                                           .extract()[0].replace('  ', '') \
+                                           .replace('\r\n', '')
+            offer['offerdesc'] = offertag.xpath(offer_desc_tag) \
+                                         .extract()[0].replace('  ', '') \
+                                         .replace('\r\n', '')
             offer['producturl'] = offertag.xpath(product_url).extract()[0]
-            offer['priceunit'] = offertag.xpath(price_unit_tag).extract()[0].replace('  ', '').replace('\r\n', '').replace('\n', '')
+            offer['priceunit'] = offertag.xpath(price_unit_tag).extract()[0] \
+                                         .replace('  ', '') \
+                                         .replace('\r\n', '') \
+                                         .replace('\n', '')
             sainsoffers.append(offer)
         return sainsoffers
 
