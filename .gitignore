@@ -3,3 +3,4 @@ logs
 *.ini
 __pycache__
 .ipynb*
+.style.yapf
