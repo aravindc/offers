@@ -40,8 +40,7 @@ class TescoOfferSpider(scrapy.Spider):
         print(math.ceil(int(itemcount[0]) / 24))
         #    return math.ceil(int(itemcount[0])/24)
         maxpage = math.ceil(int(itemcount[0]) / 24)
-        tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers \
-                    ?page=%d'
+        tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?page=%d'
         for i in range(1, maxpage):
             tesco_start_url.append(tescourl % i)
         return tesco_start_url
@@ -55,8 +54,7 @@ class TescoOfferSpider(scrapy.Spider):
         print(math.ceil(int(itemcount[0]) / 24))
         #    return math.ceil(int(itemcount[0])/24)
         maxpage = math.ceil(int(itemcount[0]) / 24)
-        tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers \
-                    ?page=%d'
+        tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?page=%d'
         for i in range(1, maxpage):
             tesco_start_url.append(tescourl % i)
         return tesco_start_url
@@ -72,17 +70,12 @@ class TescoOfferSpider(scrapy.Spider):
         hxs = Selector(response)    # The XPath selector
 
         # XPath Tags
-        productlist_tag = '//div[@class="product-lists"]//ul[@class= \
-                          "product-list grid"]/li'
-        product_id_tag = './/div[@class="product-tile--wrapper"]//div[@class= \
-                         "tile-content"]/a/@href'
+        productlist_tag = '//div[@class="product-lists"]//ul[@class="product-list grid"]/li'
+        product_id_tag = './/div[@class="product-tile--wrapper"]//div[@class="tile-content"]/a/@href'
         product_imgsrc_tag = './/img/@src'
-        product_desc_tag = './/div[@class="product-details--wrapper"]//a/ \
-                            text()'
-        offer_desc_tag = './/li[@class="product-promotion"]//span[@class= \
-                         "offer-text"]/text()'
-        validity_desc_tag = './/li[@class="product-promotion"]//span[@class= \
-                             "dates"]/text()'
+        product_desc_tag = './/div[@class="product-details--wrapper"]//a/text()'
+        offer_desc_tag = './/li[@class="product-promotion"]//span[@class="offer-text"]/text()'
+        validity_desc_tag = './/li[@class="product-promotion"]//span[@class="dates"]/text()'
         offertags = hxs.xpath(productlist_tag)
         ###
 
