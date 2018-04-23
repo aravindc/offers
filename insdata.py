@@ -43,6 +43,7 @@ def sains_ins_data(conxn, json_file):
     except Error as e:
         logger.error(e)
     finally:
+        logger.info('inserted %s records' % len(json.loads(json_data)))
         cursor.close()
 
 
@@ -60,6 +61,7 @@ def tesc_ins_data(conxn, json_file):
     except Error as e:
         logger.error(e)
     finally:
+        logger.info('inserted %s records' % len(json.loads(json_data)))
         cursor.close()
 
 
@@ -77,6 +79,7 @@ def morri_ins_data(conxn, json_file):
     except Error as e:
         logger.error(e)
     finally:
+        logger.info('inserted %s records' % len(json.loads(json_data)))
         cursor.close()
 
 
@@ -94,6 +97,7 @@ def occad_ins_data(conxn, json_file):
     except Error as e:
         logger.error(e)
     finally:
+        logger.info('inserted %s records' % len(json.loads(json_data)))
         cursor.close()
 
 
