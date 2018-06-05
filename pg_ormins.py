@@ -91,25 +91,25 @@ def get_ins_date(retailer):
         if result is None:
             result = '20180215'
         else:
-            result = datetime.strftime(orm.select(a.ins_ts for a in Asda).max() + timedelta(days=1), '%Y%m%d')
+            result = datetime.strftime(orm.select(a.ins_ts for a in Tesco).max() + timedelta(days=1), '%Y%m%d')
     if retailer == 'sainsburys':
         result = orm.select(a.ins_ts for a in Sainsburys).max()
         if result is None:
             result = '20180215'
         else:
-            result = datetime.strftime(orm.select(a.ins_ts for a in Asda).max() + timedelta(days=1), '%Y%m%d')
+            result = datetime.strftime(orm.select(a.ins_ts for a in Sainsburys).max() + timedelta(days=1), '%Y%m%d')
     if retailer == 'morrison':
         result = orm.select(a.ins_ts for a in Morrison).max()
         if result is None:
             result = '20180220'
         else:
-            result = datetime.strftime(orm.select(a.ins_ts for a in Asda).max() + timedelta(days=1), '%Y%m%d')
+            result = datetime.strftime(orm.select(a.ins_ts for a in Morrison).max() + timedelta(days=1), '%Y%m%d')
     if retailer == 'ocado':
         result = orm.select(a.ins_ts for a in Ocado).max()
         if result is None:
             result = '20180308'
         else:
-            result = datetime.strftime(orm.select(a.ins_ts for a in Asda).max() + timedelta(days=1), '%Y%m%d')
+            result = datetime.strftime(orm.select(a.ins_ts for a in Ocado).max() + timedelta(days=1), '%Y%m%d')
     if retailer == 'asda':
         result = orm.select(a.ins_ts for a in Asda).max()
         if result is None:
