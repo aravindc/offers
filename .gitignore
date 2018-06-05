@@ -4,3 +4,5 @@ logs
 __pycache__
 .ipynb*
 .style.yapf
+mysm.py
+test.png
