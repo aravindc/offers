@@ -40,9 +40,9 @@ proxyDict = {
 
 
 def proxyRequest(url):
-    time.Sleep(3)
-    # return requests.get(url, proxies=proxyDict)
-    return requests.get(url)
+    time.sleep(3)
+    return requests.get(url, proxies=proxyDict)
+    #return requests.get(url)
 
 
 def getCategories():
@@ -137,7 +137,8 @@ def getItemDetails(allCat):
                 tmpItem['largeImage'] = item['images']['largeImage']
                 tmpItem['ins_ts'] = datetime.now().strftime("%Y-%m-%d")
                 totalItems.append(tmpItem)
-    logger.info(totalItems)
+    logger.debug(totalItems)
+    return totalItems
 
 
 if __name__ == '__main__':
@@ -150,4 +151,4 @@ if __name__ == '__main__':
     except OSError:
         pass
     with open(FILE_NAME, 'w+') as outfile:
-        outfile.write(offerProducts)
+        json.dump(offerProducts, outfile)
