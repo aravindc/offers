@@ -2,6 +2,7 @@ import requests
 import json
 import logging
 import time
+import math
 import urllib.parse as urlparse
 
 
@@ -86,9 +87,9 @@ def getItemIds(categories):
                 if(sku_record['attributes']['sku.repositoryId'][0] not in itemIds['sku_repoId']):
                     itemIds['sku_repoId'].append(sku_record['attributes']['sku.repositoryId'][0])
                     logger.debug(sku_record['attributes']['sku.repositoryId'])
-            # break
+            break
         allCat.append(itemIds)
-        # break
+        break
     logger.debug(allCat)
     return allCat
 
@@ -96,7 +97,15 @@ def getItemIds(categories):
 def getItemDetails(allCat):
     itemDetailUrl = 'https://groceries.asda.com/api/items/view?storeid=4565&shipdate=' + str(int(time.time())*1000) + '&itemid={}'
     for category in allCat:
-        logger.info(category['category'] + ': ' + str(len(category['sku_repoId'])))
+        logger.debug(category['category'] + ': ' + str(len(category['sku_repoId'])))
+        logger.debug(category['sku_repoId'])
+        for i in range(0, math.ceil(len(category['sku_repoId']) / 15)):
+            start = i*15
+            end = start + 15
+            itemString = ','.join(map(str, category['sku_repoId'][start:end]))
+            logger.debug('Start: '+str(start)+' : End: '+str(end))
+            logger.debug(itemString)
+            logger.info(itemDetailUrl.format(itemString))
 
 
 if __name__ == '__main__':
