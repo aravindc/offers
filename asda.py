@@ -3,8 +3,10 @@ import json
 import logging
 import time
 import math
+import re
+import os
 import urllib.parse as urlparse
-
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,6 +40,7 @@ proxyDict = {
 
 
 def proxyRequest(url):
+    time.Sleep(3)
     # return requests.get(url, proxies=proxyDict)
     return requests.get(url)
 
@@ -96,9 +99,11 @@ def getItemIds(categories):
 
 def getItemDetails(allCat):
     itemDetailUrl = 'https://groceries.asda.com/api/items/view?storeid=4565&shipdate=' + str(int(time.time())*1000) + '&itemid={}'
+    regx = re.compile('[^a-zA-Z0-9 ]')
     for category in allCat:
         logger.debug(category['category'] + ': ' + str(len(category['sku_repoId'])))
         logger.debug(category['sku_repoId'])
+        totalItems = []
         for i in range(0, math.ceil(len(category['sku_repoId']) / 15)):
             start = i*15
             end = start + 15
@@ -106,9 +111,43 @@ def getItemDetails(allCat):
             logger.debug('Start: '+str(start)+' : End: '+str(end))
             logger.debug(itemString)
             logger.info(itemDetailUrl.format(itemString))
+            itemDetail_Output = proxyRequest(itemDetailUrl.format(itemString))
+            items = json.loads(itemDetail_Output.text)['items']
+            for item in items:
+                tmpItem = {}
+                tmpItem['category'] = category['category']
+                tmpItem['id'] = item['id']
+                tmpItem['deptName'] = item['deptName']
+                tmpItem['brandName'] = item['brandName']
+                tmpItem['name'] = item['name']
+                tmpItem['promoDetailFull'] = item['promoDetailFull']
+                tmpItem['shelfId'] = item['shelfId']
+                tmpItem['shelfName'] = item['shelfName']
+                tmpItem['promoDetail'] = item['promoDetail']
+                tmpItem['price'] = item['price']
+                tmpItem['wasPrice'] = item['wasPrice']
+                tmpItem['deptId'] = item['deptId']
+                tmpItem['imageURL'] = item['imageURL']
+                tmpItem['pricePerUOM'] = item['pricePerUOM']
+                shelfName = regx.sub('', item['shelfName']).replace('  ', ' ').replace(' ', '-').lower()
+                prodName = regx.sub('', item['name']).replace('  ', ' ').replace(' ', '-').lower()
+                tmpItem['productURL'] = 'https://groceries.asda.com/product/' + shelfName + '/' + prodName + '/' + item['id']
+                tmpItem['scene7AssetId'] = item['scene7AssetId']
+                tmpItem['thumbnailImage'] = item['images']['thumbnailImage']
+                tmpItem['largeImage'] = item['images']['largeImage']
+                tmpItem['ins_ts'] = datetime.now().strftime("%Y-%m-%d")
+                totalItems.append(tmpItem)
+    logger.info(totalItems)
 
 
 if __name__ == '__main__':
     categories = getCategories()
     itemIds = getItemIds(categories)
     offerProducts = getItemDetails(itemIds)
+    FILE_NAME = '/opt/offers/ASDA_' + datetime.now().strftime("%Y%m%d") + '.json'
+    try:
+        os.remove(FILE_NAME)
+    except OSError:
+        pass
+    with open(FILE_NAME, 'w+') as outfile:
+        outfile.write(offerProducts)
