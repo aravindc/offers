@@ -96,9 +96,9 @@ def getItemIds(categories):
                 if(sku_record['attributes']['sku.repositoryId'][0] not in itemIds['sku_repoId']):
                     itemIds['sku_repoId'].append(sku_record['attributes']['sku.repositoryId'][0])
                     logger.debug(sku_record['attributes']['sku.repositoryId'])
-            break
+            # break
         allCat.append(itemIds)
-        break
+        # break
     logger.debug(allCat)
     return allCat
 
