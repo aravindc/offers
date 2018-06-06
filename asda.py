@@ -15,8 +15,16 @@ asda_urls = {
     "base_url": "https://groceries.asda.com",
     "entry_url": "https://groceries.asda.com/cmscontent/json/pages/" +
                  "special-offers/all-offers?storeId=4565&shipDate=" +
-                 str(int(time.time())*1000)
+                 str(int(time.time())*1000),
+    "item_url": "https://groceries.asda.com/cmscontent/json/pages/" +
+                "special-offers/all-offers/by-category?storeId=4565&" +
+                "N={}&Nrpp=60&No={}&shipDate="+str(int(time.time())*1000),
+    "item_detail_url": "https://groceries.asda.com/api/items/view?" +
+                       "storeid=4565&shipdate=" + str(int(time.time())*1000) +
+                       "&itemid={}"
     }
+
+all_urls = json.loads(json.dumps(asda_urls))
 
 http_proxy = "http://localhost:8123"
 https_proxy = "https://localhost:8123"
@@ -42,7 +50,7 @@ proxyDict = {
 def proxyRequest(url):
     time.sleep(3)
     return requests.get(url, proxies=proxyDict)
-    #return requests.get(url)
+    # return requests.get(url)
 
 
 def getCategories():
@@ -56,9 +64,7 @@ def getCategories():
     # 1097|1098|1099|1100|1102|1105|1107|1109|1110|1111|1112|1116|1117|1119|
     # 1123|1124|1126|1128|1130&storeId=4565&shipDate=1526605200000&
     # requestorigin=gi&_=1526659177596')
-    url1 = json.loads(json.dumps(asda_urls))
-    logger.debug(url1)
-    r = proxyRequest(url1['entry_url'])
+    r = proxyRequest(all_urls['entry_url'])
     json_obj = json.loads(r.text)
     json_data = []
     refinements = json_obj['contents'][0]['mainContent'][0]['refinements']
@@ -75,7 +81,6 @@ def getCategories():
 
 
 def getItemIds(categories):
-    itemUrl = 'https://groceries.asda.com/cmscontent/json/pages/special-offers/all-offers/by-category?storeId=4565&N={}&Nrpp=60&No={}&shipDate='+str(int(time.time())*1000)
     json_objs = json.loads(json.dumps(categories))
     allCat = []
     for json_obj in json_objs:
@@ -83,8 +88,8 @@ def getItemIds(categories):
         itemIds['category'] = json_obj['category']
         itemIds['sku_repoId'] = []
         for i in range(0, json_obj['count'], 60):
-            logger.debug(itemUrl.format(json_obj['categoryId'], i))
-            item_resp = proxyRequest(itemUrl.format(json_obj['categoryId'], i))
+            logger.debug(all_urls['item_url'].format(json_obj['categoryId'], i))
+            item_resp = proxyRequest(all_urls['item_url'].format(json_obj['categoryId'], i))
             sku_records = json.loads(item_resp.text)['contents'][0]['mainContent'][3]['dynamicSlot']['contents'][0]['mainContent'][0]['records']
             for sku_record in sku_records:
                 if(sku_record['attributes']['sku.repositoryId'][0] not in itemIds['sku_repoId']):
@@ -98,7 +103,7 @@ def getItemIds(categories):
 
 
 def getItemDetails(allCat):
-    itemDetailUrl = 'https://groceries.asda.com/api/items/view?storeid=4565&shipdate=' + str(int(time.time())*1000) + '&itemid={}'
+
     regx = re.compile('[^a-zA-Z0-9 ]')
     for category in allCat:
         logger.debug(category['category'] + ': ' + str(len(category['sku_repoId'])))
@@ -110,8 +115,8 @@ def getItemDetails(allCat):
             itemString = ','.join(map(str, category['sku_repoId'][start:end]))
             logger.debug('Start: '+str(start)+' : End: '+str(end))
             logger.debug(itemString)
-            logger.info(itemDetailUrl.format(itemString))
-            itemDetail_Output = proxyRequest(itemDetailUrl.format(itemString))
+            logger.info(all_urls['item_detail_url'].format(itemString))
+            itemDetail_Output = proxyRequest(all_urls['item_detail_url'].format(itemString))
             items = json.loads(itemDetail_Output.text)['items']
             for item in items:
                 tmpItem = {}
