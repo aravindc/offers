@@ -5,7 +5,7 @@ import time
 import math
 import re
 import os
-import codecs
+import io
 import urllib.parse as urlparse
 from datetime import datetime
 
@@ -156,5 +156,5 @@ if __name__ == '__main__':
         os.remove(FILE_NAME)
     except OSError:
         pass
-    with codecs.open(FILE_NAME, 'w+', 'utf-8') as outfile:
+    with io.open(FILE_NAME, 'w+', encoding='utf-8') as outfile:
         json.dump(offerProducts, outfile)
