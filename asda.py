@@ -126,26 +126,30 @@ def getItemDetails(allCat):
             items = json.loads(itemDetail_Output.text)['items']
             for item in items:
                 tmpItem = {}
-                tmpItem['category'] = category['category'] if category['category'] is not None else ''
-                tmpItem['id'] = item['id'] if item['id'] is not None else ''
-                tmpItem['deptName'] = item['deptName'] if item['deptName'] is not None else ''
-                tmpItem['brandName'] = item['brandName'] if item['brandName'] is not None else ''
-                tmpItem['name'] = item['name'] if item['name'] is not None else ''
-                tmpItem['promoDetailFull'] = item['promoDetailFull'] if item['promoDetailFull'] is not None else ''
-                tmpItem['shelfId'] = item['shelfId'] if item['shelfId'] is not None else ''
-                tmpItem['shelfName'] = item['shelfName'] if item['shelfName'] is not None else ''
-                tmpItem['promoDetail'] = item['promoDetail'] if item['promoDetail'] is not None else ''
-                tmpItem['price'] = item['price'] if item['price'] is not None else ''
-                tmpItem['wasPrice'] = item['wasPrice'] if item['wasPrice'] is not None else ''
-                tmpItem['deptId'] = item['deptId'] if item['deptId'] is not None else ''
+                tmpItem['category'] = category['category'] if 'category' in category else ''
+                tmpItem['id'] = item['id'] if 'id' in item else ''
+                tmpItem['deptName'] = item['deptName'] if 'deptName' in item else ''
+                tmpItem['brandName'] = item['brandName'] if 'brandName' in item else ''
+                tmpItem['name'] = item['name'] if 'name' in item else ''
+                tmpItem['promoDetailFull'] = item['promoDetailFull'] if 'promoDetailFull' in item else ''
+                tmpItem['shelfId'] = item['shelfId'] if 'shelfId' in item else ''
+                tmpItem['shelfName'] = item['shelfName'] if 'shelfName' in item else ''
+                tmpItem['promoDetail'] = item['promoDetail'] if 'promoDetail' in item else ''
+                tmpItem['price'] = item['price'] if 'price' in item else ''
+                tmpItem['wasPrice'] = item['wasPrice'] if 'wasPrice' in item else ''
+                tmpItem['deptId'] = item['deptId'] if 'deptId' in item else ''
                 tmpItem['imageURL'] = item['imageURL'] if 'imageURL' in item else ''
-                tmpItem['pricePerUOM'] = item['pricePerUOM'] if item['pricePerUOM'] is not None else ''
+                tmpItem['pricePerUOM'] = item['pricePerUOM'] if 'pricePerUOM' in item else ''
                 shelfName = regx.sub('', tmpItem['shelfName']).replace('  ', ' ').replace(' ', '-').lower()
                 prodName = regx.sub('', tmpItem['name']).replace('  ', ' ').replace(' ', '-').lower()
                 tmpItem['productURL'] = 'https://groceries.asda.com/product/' + shelfName + '/' + prodName + '/' + item['id']
-                tmpItem['scene7AssetId'] = item['scene7AssetId'] if item['scene7AssetId'] is not None else ''
-                tmpItem['thumbnailImage'] = item['images']['thumbnailImage'] if item['images']['thumbnailImage'] is not None else ''
-                tmpItem['largeImage'] = item['images']['largeImage'] if item['images']['largeImage'] is not None else ''
+                tmpItem['scene7AssetId'] = item['scene7AssetId'] if 'scene7AssetId' in item else ''
+                if 'images' in item:
+                    tmpItem['thumbnailImage'] = item['images']['thumbnailImage'] if 'thumbnailImage' in item['images'] else ''
+                    tmpItem['largeImage'] = item['images']['largeImage'] if 'largeImage' in item['images'] else ''
+                else:
+                    tmpItem['thumbnailImage'] = ''
+                    tmpItem['largeImage'] = ''
                 tmpItem['ins_ts'] = datetime.now().strftime("%Y-%m-%d")
                 totalItems.append(tmpItem)
     logger.debug(totalItems)
