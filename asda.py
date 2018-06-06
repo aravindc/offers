@@ -10,7 +10,12 @@ import urllib.parse as urlparse
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
+LOG_FILE = '/opt/offers/logs/ASDA_' + datetime.now().strftime("%Y%m%d") + '.log'
+hdlr = logging.FileHandler(LOG_FILE)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
 logger = logging.getLogger(__name__)
+logger.addHandler(hdlr)
 
 asda_urls = {
     "base_url": "https://groceries.asda.com",
@@ -96,9 +101,9 @@ def getItemIds(categories):
                 if(sku_record['attributes']['sku.repositoryId'][0] not in itemIds['sku_repoId']):
                     itemIds['sku_repoId'].append(sku_record['attributes']['sku.repositoryId'][0])
                     logger.debug(sku_record['attributes']['sku.repositoryId'])
-            break
+            #break
         allCat.append(itemIds)
-        break
+        #break
     logger.debug(allCat)
     return allCat
 
