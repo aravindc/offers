@@ -157,4 +157,4 @@ if __name__ == '__main__':
     except OSError:
         pass
     with io.open(FILE_NAME, 'w+', encoding='utf-8') as outfile:
-        json.dump(offerProducts, outfile)
+        json.dump(offerProducts, outfile, ensure_ascii=False)
