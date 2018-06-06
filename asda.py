@@ -133,7 +133,7 @@ def getItemDetails(allCat):
                 tmpItem['price'] = item['price'] if item['price'] is not None else ''
                 tmpItem['wasPrice'] = item['wasPrice'] if item['wasPrice'] is not None else ''
                 tmpItem['deptId'] = item['deptId'] if item['deptId'] is not None else ''
-                tmpItem['imageURL'] = item['imageURL'] if item['imageURL'] is not None else ''
+                tmpItem['imageURL'] = item['imageURL'] if 'imageURL' in item else ''
                 tmpItem['pricePerUOM'] = item['pricePerUOM'] if item['pricePerUOM'] is not None else ''
                 shelfName = regx.sub('', tmpItem['shelfName']).replace('  ', ' ').replace(' ', '-').lower()
                 prodName = regx.sub('', tmpItem['name']).replace('  ', ' ').replace(' ', '-').lower()
