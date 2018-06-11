@@ -9,7 +9,7 @@ import io
 import urllib.parse as urlparse
 from datetime import datetime
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 LOG_FILE = '/opt/offers/logs/ASDA_' + datetime.now().strftime("%Y%m%d") + '.log'
 hdlr = logging.FileHandler(LOG_FILE)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -54,7 +54,7 @@ proxyDict = {
 
 
 def proxyRequest(url):
-    time.sleep(3)
+    time.sleep(5)
     return requests.get(url, proxies=proxyDict)
     # return requests.get(url)
 
@@ -93,6 +93,7 @@ def getItemIds(categories):
         itemIds = {}
         itemIds['category'] = json_obj['category']
         itemIds['sku_repoId'] = []
+        logger.info('Working on {}'.format(itemIds['category']))
         for i in range(0, json_obj['count'], 60):
             logger.debug(all_urls['item_url'].format(json_obj['categoryId'], i))
             item_resp = proxyRequest(all_urls['item_url'].format(json_obj['categoryId'], i))
@@ -109,12 +110,11 @@ def getItemIds(categories):
 
 
 def getItemDetails(allCat):
-
     regx = re.compile('[^a-zA-Z0-9 ]')
+    totalItems = []
     for category in allCat:
         logger.debug(category['category'] + ': ' + str(len(category['sku_repoId'])))
         logger.debug(category['sku_repoId'])
-        totalItems = []
         for i in range(0, math.ceil(len(category['sku_repoId']) / 15)):
             start = i*15
             end = start + 15
