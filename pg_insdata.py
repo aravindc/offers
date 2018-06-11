@@ -79,6 +79,15 @@ def get_file_name(conxn, tabname):
             logger.info(retval)
             if retval is None:
                 retval = '20180308'
+        elif tabname == 'asda':
+            qrystr = """SELECT to_char(max(ins_ts) + interval '1 day',
+               'YYYYMMDD') as insdt from asda"""
+            cursor.execute(qrystr)
+            row = cursor.fetchone()
+            retval = row[0]
+            logger.info(retval)
+            if retval is None:
+                retval = '20180611'
     except Exception as e:
         logger.error(e)
     finally:
@@ -145,6 +154,9 @@ if __name__ == '__main__':
                                         args['type']) + '.json')
         elif args['type'] == 'ocado':
             json_file = os.path.abspath('OCCAD_' + get_file_name(conx,
+                                        args['type']) + '.json')
+        elif args['type'] == 'asda':
+            json_file = os.path.abspath('ASDA_' + get_file_name(conx,
                                         args['type']) + '.json')
         else:
             logger.error("Invalid retailer name provided")

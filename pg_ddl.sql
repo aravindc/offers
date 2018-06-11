@@ -63,3 +63,14 @@ FOR EACH ROW EXECUTE PROCEDURE create_partition_and_insert();
 CREATE TRIGGER ocado_partition_insert_trigger
 BEFORE INSERT ON ocado
 FOR EACH ROW EXECUTE PROCEDURE create_partition_and_insert();
+
+drop table if exists asda;
+CREATE TABLE public.asda (
+	id uuid NULL,
+	"data" jsonb NULL,
+	ins_ts date NULL
+) WITH ( OIDS=FALSE);
+
+CREATE TRIGGER asda_partition_insert_trigger
+BEFORE INSERT ON asda
+FOR EACH ROW EXECUTE PROCEDURE create_partition_and_insert();
