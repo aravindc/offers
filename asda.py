@@ -95,6 +95,7 @@ def getItemIds(categories):
         itemIds['sku_repoId'] = []
         logger.info('Working on {}'.format(itemIds['category']))
         for i in range(0, json_obj['count'], 60):
+            time.sleep(5)
             logger.debug(all_urls['item_url'].format(json_obj['categoryId'], i))
             item_resp = proxyRequest(all_urls['item_url'].format(json_obj['categoryId'], i))
             sku_records = json.loads(item_resp.text)['contents'][0]['mainContent'][3]['dynamicSlot']['contents'][0]['mainContent'][0]['records']
@@ -113,6 +114,7 @@ def getItemDetails(allCat):
     regx = re.compile('[^a-zA-Z0-9 ]')
     totalItems = []
     for category in allCat:
+        time.sleep(60)
         logger.debug(category['category'] + ': ' + str(len(category['sku_repoId'])))
         logger.debug(category['sku_repoId'])
         for i in range(0, math.ceil(len(category['sku_repoId']) / 15)):
