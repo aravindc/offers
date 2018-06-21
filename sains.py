@@ -27,7 +27,8 @@ class SainsburysOfferItem(scrapy.Item):
 class MySpider(scrapy.Spider):
     def getSainsStartUrl():
         sains_start_url = []
-        categoryId = [12518, 13343, 267396, 267397, 12320, 218831, 12422,
+        # Dairy code changed from 267396 to Dairy, Eggs & Juice -  387873
+        categoryId = [12518, 13343, 387873, 267397, 12320, 218831, 12422,
                       12192, 12448, 11651, 12564, 12298, 281806]
         # categoryId=[12518]
         # categoryId=[12518,13343,12422]
