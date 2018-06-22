@@ -111,7 +111,7 @@ def asda_ins_data(conxn, json_file):
         qrystr = """INSERT INTO asda (producturl, promodetail, shelfid, name, scene7assetid, largeimage, promodetailfull, imageurl, deptid, deptname, wasprice, shelfname, id, category, price, brandname, thumbnailimage, priceperuom, ins_ts) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         logger.info(qrystr)
         for item in json.loads(json_data):
-            cursor.execute(qrystr, (item['producturl'], item['promodetail'], item['shelfid'], item['name'], item['scene7assetid'], item['largeimage'], item['promodetailfull'], item['imageurl'], item['deptid'], item['deptname'], item['wasprice'], item['shelfname'], item['id'], item['category'], item['price'], item['brandname'], item['thumbnailimage'], item['priceperuom'], ins_dt))
+            cursor.execute(qrystr, (item['productURL'], item['promoDetail'], item['shelfId'], item['name'], item['scene7AssetId'], item['largeImage'], item['promoDetailFull'], item['imageURL'], item['deptId'], item['deptName'], item['wasPrice'], item['shelfName'], item['id'], item['category'], item['price'], item['brandName'], item['thumbnailImage'], item['pricePerUOM'], ins_dt))
         conxn.commit()
     except Error as e:
         logger.error(e)
