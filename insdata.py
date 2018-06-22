@@ -101,6 +101,24 @@ def occad_ins_data(conxn, json_file):
         cursor.close()
 
 
+def asda_ins_data(conxn, json_file):
+    try:
+        cursor = conxn.cursor()
+        json_data = open(json_file).read()
+        temp_str = os.path.splitext(json_file)[0]
+        end = None
+        ins_dt = temp_str[temp_str.find('_') + 1:end]
+        qrystr = """INSERT INTO asda (producturl, promodetail, shelfid, name, scene7assetid, largeimage, promodetailfull, imageurl, deptid, deptname, wasprice, shelfname, id, category, price, brandname, thumbnailimage, priceperuom, ins_ts) VALUES (%s, %s, %d, %s, %d, %s, %s, %s, %d, %s, %s, %s, %d, %s, %s, %s, %s, %s, %s)"""
+        for item in json.loads(json_data):
+            cursor.execute(qrystr, )
+        conxn.commit()
+    except Error as e:
+        logger.error(e)
+    finally:
+        logger.info('inserted %s records' % len(json.loads(json_data)))
+        cursor.close()
+
+
 def get_file_name(conxn, tabname):
     try:
         cursor = conxn.cursor()
@@ -136,6 +154,14 @@ def get_file_name(conxn, tabname):
             logger.info(retval)
             if retval is None:
                 retval = '20180304'
+        elif tabname == 'asda':
+            qrystr = """SELECT date_format(DATE_ADD(max(ins_ts), INTERVAL 1 DAY),'%Y%m%d') from asda"""
+            cursor.execute(qrystr)
+            row = cursor.fetchone()
+            retval = row[0]
+            logger.info(retval)
+            if retval is None:
+                retval = '20180611'
     except Error as e:
         logger.error(e)
     finally:
@@ -158,6 +184,8 @@ if __name__ == '__main__':
         json_file = '/opt/offers/MORRI_' + get_file_name(conx, 'morri') + '.json'
     elif args['type'] == 'occad':
         json_file = '/opt/offers/OCCAD_' + get_file_name(conx, 'occad') + '.json'
+    elif args['type'] == 'asda':
+        json_file = '/opt/offers/ASDA_' + get_file_name(conx, 'asda') + '.json'
     else:
         logger.error("Invalid retailer name provided")
         conx.close()
@@ -172,6 +200,8 @@ if __name__ == '__main__':
             morri_ins_data(conx, json_file)
         elif args['type'] == 'occad':
             occad_ins_data(conx, json_file)
+        elif args['type'] == 'asda':
+            asda_ins_data(conx, json_file)
     else:
         logger.error('File: ' + json_file + ' not found...')
     conx.close()
