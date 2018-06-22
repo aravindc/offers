@@ -109,7 +109,7 @@ def asda_ins_data(conxn, json_file):
         end = None
         ins_dt = temp_str[temp_str.find('_') + 1:end]
         qrystr = """INSERT INTO asda (producturl, promodetail, shelfid, name, scene7assetid, largeimage, promodetailfull, imageurl, deptid, deptname, wasprice, shelfname, id, category, price, brandname, thumbnailimage, priceperuom, ins_ts) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-        logger.info(qrystr)
+        logger.debug(qrystr)
         for item in json.loads(json_data):
             cursor.execute(qrystr, (item['productURL'], item['promoDetail'], item['shelfId'], item['name'], item['scene7AssetId'], item['largeImage'], item['promoDetailFull'], item['imageURL'], item['deptId'], item['deptName'], item['wasPrice'], item['shelfName'], item['id'], item['category'], item['price'], item['brandName'], item['thumbnailImage'], item['pricePerUOM'], ins_dt))
         conxn.commit()
