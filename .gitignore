@@ -6,3 +6,5 @@ __pycache__
 .style.yapf
 mysm.py
 test.png
+database.sqlite
+ormtest.py
