@@ -123,3 +123,5 @@ if __name__ == '__main__':
                 ins_data(json_file, fileDate, retailer)
         else:
             logger.error('File: ' + json_file + ' not found...')
+    finally:
+        logger.inf('Activity Complete')
