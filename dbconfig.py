@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def read_mysql_config(filename='config.ini', section='mysql'):
     parser = ConfigParser()
-    parser.read([os.path.expanduser(filename)])
+    parser.read([os.path.dirname(__file__).replace('\\', '/')+'/'+filename])
     db = {}
     if parser.has_section(section):
         items = parser.items(section)
@@ -24,7 +24,7 @@ def read_pg_config(filename='config.ini', section='pgsql'):
     #  create a parser
     parser = ConfigParser()
     #  read config file
-    parser.read(os.path.expanduser(filename))
+    parser.read(os.path.dirname(__file__).replace('\\', '/')+'/'+filename)
     #  get section, default to postgresql
     db = {}
     if parser.has_section(section):
