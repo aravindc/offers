@@ -7,6 +7,7 @@ from dbconfig import read_pg_config
 import argparse
 import os
 import sys
+import glob
 
 
 logging.basicConfig(level=logging.INFO)
@@ -54,9 +55,12 @@ db.generate_mapping(create_tables=True)
 
 
 def ins_all_files(retailer):
-    files = [f for f in os.listdir('./'+retailer+'_*.json') if os.path.isfile(f)]
+    files = glob.glob(os.path.abspath(retailer+'_*.json'))
+    files.sort(key=os.path.getmtime)
     for f in files:
-        logger.info(f)
+        insDt = f.split('_')[1].split('.')[0]
+        with orm.db_session:
+            ins_data(f, insDt, retailer.lower())
 
 
 @orm.db_session
@@ -65,13 +69,13 @@ def ins_data(insFile, insDt, retailer):
         json_objs = json.load(f)
         logger.info(insDt)
         for json_obj in json_objs:
-            if retailer == 'tesco':
+            if retailer == 'tesco' or retailer == 'tesc':
                 Tesco(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
-            elif retailer == 'sainsburys':
+            elif retailer == 'sainsburys' or retailer == 'sains':
                 Sainsburys(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
-            elif retailer == 'morrison':
+            elif retailer == 'morrison' or retailer = 'morri':
                 Morrison(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
-            elif retailer == 'ocado':
+            elif retailer == 'ocado' or retailer = 'occad':
                 Ocado(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
             elif retailer == 'asda':
                 logger.debug(json_obj)
