@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime, timedelta
 import uuid
 from pony import orm
 import json
@@ -22,31 +22,31 @@ db.bind(provider='postgres', user=params['user'], password=params['password'],
 class Morrison(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(date)
+    ins_ts = orm.Required(datetime)
 
 
 class Ocado(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(date)
+    ins_ts = orm.Required(datetime)
 
 
 class Sainsburys(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(date)
+    ins_ts = orm.Required(datetime)
 
 
 class Tesco(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(date)
+    ins_ts = orm.Required(datetime)
 
 
 class Asda(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(date)
+    ins_ts = orm.Required(datetime)
 
 
 #orm.sql_debug(True)
@@ -57,6 +57,7 @@ db.generate_mapping(create_tables=True)
 def ins_data(insFile, insDt, retailer):
     with open(insFile, 'r+', encoding='utf-8') as f:
         json_objs = json.load(f)
+        logger.info(insDt)
         for json_obj in json_objs:
             if retailer == 'tesco':
                 Tesco(data=json_obj, ins_ts=datetime.strptime(insDt,'%Y%m%d'))
@@ -95,8 +96,10 @@ def get_ins_date(retailer):
         result = orm.select(a.ins_ts for a in Asda).max()
         if result is None:
             result = '20180611'
-    logger.info(date.strftime(result + date.timedelta(days=1),'%Y%m%d'))
-    return date.strftime(result + date.timedelta(days=1),'%Y%m%d')
+        else:
+            result = datetime.strftime(orm.select(a.ins_ts for a in Asda).max() + timedelta(days=1),'%Y%m%d')
+    logger.info(result)
+    return result 
 
 
 if __name__ == '__main__':
