@@ -1,9 +1,12 @@
-from datetime import datetime
+from datetime import date
 import uuid
 from pony import orm
 import json
 import logging
 from dbconfig import read_pg_config
+import argparse
+import os
+import sys
 
 
 logging.basicConfig(level=logging.INFO)
@@ -16,82 +19,84 @@ db.bind(provider='postgres', user=params['user'], password=params['password'],
         host=params['host'], database=params['database'])
 
 
-class morrison(db.entity):
+class Morrison(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(datetime)
+    ins_ts = orm.Required(date)
 
 
-class ocado(db.entity):
+class Ocado(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(datetime)
+    ins_ts = orm.Required(date)
 
 
-class sainsburys(db.entity):
+class Sainsburys(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(datetime)
+    ins_ts = orm.Required(date)
 
 
-class tesco(db.entity):
+class Tesco(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(datetime)
+    ins_ts = orm.Required(date)
 
 
-class asda(db.entity):
+class Asda(db.Entity):
     id = orm.PrimaryKey(uuid.UUID, default=uuid.uuid4, auto=True)
     data = orm.Required(orm.Json)
-    ins_ts = orm.Required(datetime)
+    ins_ts = orm.Required(date)
 
 
-sql_debug(True)
+#orm.sql_debug(True)
 db.generate_mapping(create_tables=True)
 
 
-@db_session
+@orm.db_session
 def ins_data(insFile, insDt, retailer):
-    with open(insfile, 'r+') as f:
+    with open(insFile, 'r+', encoding='utf-8') as f:
         json_objs = json.load(f)
         for json_obj in json_objs:
             if retailer == 'tesco':
-                tesco(data_json=json_obj, ins_ts=insDt)
+                Tesco(data=json_obj, ins_ts=datetime.strptime(insDt,'%Y%m%d'))
             elif retailer == 'sainsburys':
-                sainsburys(data_json=json_obj, ins_ts=insDt)
+                Sainsburys(data=json_obj, ins_ts=datetime.strptime(insDt,'%Y%m%d'))
             elif retailer == 'morrison':
-                morrison(data_json=json_obj, ins_ts=insDt)
+                Morrison(data=json_obj, ins_ts=datetime.strptime(insDt,'%Y%m%d'))
             elif retailer == 'ocado':
-                ocado(data_json=json_obj, ins_ts=insDt)
+                Ocado(data=json_obj, ins_ts=datetime.strptime(insDt,'%Y%m%d'))
             elif retailer == 'asda':
-                asda(data_json=json_obj, ins_ts=insDt)
+                logger.debug(json_obj)
+                Asda(data=json_obj, ins_ts=datetime.strptime(insDt,'%Y%m%d'))
             else:
                 logger.error('Invalid retailer name provided')
 
 
-@db_session
+@orm.db_session
 def get_ins_date(retailer):
     if retailer == 'tesco':
-        result = asda.select_by_sql("SELECT to_char(max(ins_ts) + interval '1 day', 'YYYYMMDD') as insdt from tesco")
+        result = orm.select(a.ins_ts for a in Tesco).max()
         if result is None:
             result = '20180215'
     if retailer == 'sainsburys':
-        result = asda.select_by_sql("SELECT to_char(max(ins_ts) + interval '1 day', 'YYYYMMDD') as insdt from sainsburys")
+        result = orm.select(a.ins_ts for a in Sainsburys).max()
         if result is None:
             result = '20180215'
     if retailer == 'morrison':
-        result = asda.select_by_sql("SELECT to_char(max(ins_ts) + interval '1 day', 'YYYYMMDD') as insdt from morrison")
+        result = orm.select(a.ins_ts for a in Morrison).max()
         if result is None:
             result = '20180220'
     if retailer == 'ocado':
-        result = asda.select_by_sql("SELECT to_char(max(ins_ts) + interval '1 day', 'YYYYMMDD') as insdt from ocado")
+        result = orm.select(a.ins_ts for a in Ocado).max()
         if result is None:
             result = '20180308'
     if retailer == 'asda':
-        result = asda.select_by_sql("SELECT to_char(max(ins_ts) + interval '1 day', 'YYYYMMDD') as insdt from asda")
+        result = orm.select(a.ins_ts for a in Asda).max()
         if result is None:
             result = '20180611'
-    return result
+    logger.info(date.strftime(result + date.timedelta(days=1),'%Y%m%d'))
+    return date.strftime(result + date.timedelta(days=1),'%Y%m%d')
 
 
 if __name__ == '__main__':
@@ -100,8 +105,9 @@ if __name__ == '__main__':
         parser.add_argument('-t', '--type', help='Retailer name',
                             required=True)
         args = vars(parser.parse_args())
-        fileDate = get_file_name(args['type'])
         retailer = args['type']
+        with orm.db_session:
+            fileDate = get_ins_date(retailer)
         logger.info('About to Insert {} for {}'.format(fileDate, retailer))
         if retailer == 'tesco':
             json_file = os.path.abspath('TESC_' + fileDate + '.json')
@@ -124,4 +130,4 @@ if __name__ == '__main__':
         else:
             logger.error('File: ' + json_file + ' not found...')
     finally:
-        logger.inf('Activity Complete')
+        logger.info('Activity Complete')
