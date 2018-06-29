@@ -73,9 +73,9 @@ def ins_data(insFile, insDt, retailer):
                 Tesco(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
             elif retailer == 'sainsburys' or retailer == 'sains':
                 Sainsburys(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
-            elif retailer == 'morrison' or retailer = 'morri':
+            elif retailer == 'morrison' or retailer == 'morri':
                 Morrison(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
-            elif retailer == 'ocado' or retailer = 'occad':
+            elif retailer == 'ocado' or retailer == 'occad':
                 Ocado(data=json_obj, ins_ts=datetime.strptime(insDt, '%Y%m%d'))
             elif retailer == 'asda':
                 logger.debug(json_obj)
