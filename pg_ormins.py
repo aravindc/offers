@@ -123,37 +123,51 @@ def get_ins_date(retailer):
 if __name__ == '__main__':
     try:
         parser = argparse.ArgumentParser()
-        parser.add_argument('-t', '--type', help='Retailer name',
+        parser.add_argument('-t', '--type', help='Single or All files',
+                            required=True)
+        parser.add_argument('-r', '--retailer', help='Retailer Name',
                             required=True)
         args = vars(parser.parse_args())
-        retailer = args['type']
-        if retailer == 'asdafiles':
-            ins_all_files('ASDA')
-            sys.exit(0)
-        with orm.db_session:
-            fileDate = get_ins_date(retailer)
-        logger.info('About to Insert {} for {}'.format(fileDate, retailer))
-        if retailer == 'tesco':
-            json_file = os.path.abspath('TESC_' + fileDate + '.json')
-        elif retailer == 'sainsburys':
-            json_file = os.path.abspath('SAINS_' + fileDate + '.json')
-        elif retailer == 'morrison':
-            json_file = os.path.abspath('MORRI_' + fileDate + '.json')
-        elif retailer == 'ocado':
-            json_file = os.path.abspath('OCCAD_' + fileDate + '.json')
-        elif retailer == 'asda':
-            json_file = os.path.abspath('ASDA_' + fileDate + '.json')
-        elif retailer == 'asdafiles':
-            ins_all_files('ASDA')
-        else:
-            logger.error("Invalid retailer name provided")
-            sys.exit(0)
-        logger.info('working on ' + json_file + ' ...')
-        logger.info(json_file)
-        if os.path.isfile(json_file):
+        filetype = args['type']
+        retailer = args['retailer']
+        if filetype == 'single':
             with orm.db_session:
-                ins_data(json_file, fileDate, retailer)
+                fileDate = get_ins_date(retailer)
+                logger.info('About to Insert {} for {}'.format(fileDate, retailer))
+            if retailer == 'tesco':
+                json_file = os.path.abspath('TESC_' + fileDate + '.json')
+            elif retailer == 'sainsburys':
+                json_file = os.path.abspath('SAINS_' + fileDate + '.json')
+            elif retailer == 'morrison':
+                json_file = os.path.abspath('MORRI_' + fileDate + '.json')
+            elif retailer == 'ocado':
+                json_file = os.path.abspath('OCCAD_' + fileDate + '.json')
+            elif retailer == 'asda':
+                json_file = os.path.abspath('ASDA_' + fileDate + '.json')
+            else:
+                logger.error("Invalid retailer name provided")
+                sys.exit(0)
+            if os.path.isfile(json_file):
+                with orm.db_session:
+                    ins_data(json_file, fileDate, retailer)
+            else:
+                logger.error('File: ' + json_file + ' not found...')
+        elif filetype == 'all':
+            if retailer == 'tesco':
+                ins_all_files('TESC')
+            elif retailer == 'sainsburys':
+                ins_all_files('SAINS')
+            elif retailer == 'morrison':
+                ins_all_files('MORRI')
+            elif retailer == 'ocado':
+                ins_all_files('OCCAD')
+            elif retailer == 'asda':
+                ins_all_files('ASDA')
+            else:
+                logger.error("Invalid retailer name provided")
+                sys.exit(0)
         else:
-            logger.error('File: ' + json_file + ' not found...')
+            logger.error("Invalid file type provided")
+            sys.exit(0)
     finally:
         logger.info('Activity Complete')
