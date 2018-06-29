@@ -123,6 +123,9 @@ if __name__ == '__main__':
                             required=True)
         args = vars(parser.parse_args())
         retailer = args['type']
+        if retailer == 'asdafiles':
+            ins_all_files('ASDA')
+            sys.exit(0)
         with orm.db_session:
             fileDate = get_ins_date(retailer)
         logger.info('About to Insert {} for {}'.format(fileDate, retailer))
