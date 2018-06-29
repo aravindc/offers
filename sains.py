@@ -23,12 +23,29 @@ class SainsburysOfferItem(scrapy.Item):
     producturl = Field()
     priceunit = Field()
 
+# Listed all product categories
+# 12518 - Fruit & vegetables
+# 13343 - Meat & fish
+# 387873 - Dairy, eggs & juice
+# 267397 - Chilled 
+# 12320 - Bakery
+# 218831 - Frozen
+# 12422 - Food cupboard
+# 340854 - Beer, wine & spirits
+# 281806 - Home & outdoor 
+# 12192 - Drinks
+# 12448 - Health & beauty
+# 11651 - Baby & toddler
+# 12564 - Household 
+# 12298 - Pet
+
 
 class MySpider(scrapy.Spider):
     def getSainsStartUrl():
         sains_start_url = []
+        # Added BWS category code to the list
         # Dairy code changed from 267396 to Dairy, Eggs & Juice -  387873
-        categoryId = [12518, 13343, 387873, 267397, 12320, 218831, 12422,
+        categoryId = [12518, 13343, 387873, 267397, 12320, 218831, 12422, 340854
                       12192, 12448, 11651, 12564, 12298, 281806]
         # categoryId=[12518]
         # categoryId=[12518,13343,12422]
