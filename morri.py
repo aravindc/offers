@@ -95,25 +95,28 @@ class MorrisonsSpider(scrapy.Spider):
         morrioffers = []
         base_url = 'https://groceries.morrisons.com'
         for offertag in offertags:
-            offer = MorrisonsOfferItem()
-            offer['imgsrcl'] = base_url + offertag.xpath(
-                img_src).extract_first()
-            offer['productdesc'] = offertag.xpath(
-                prod_desc).extract_first().replace('  ', '').replace(
-                    '\r\n', '').replace('\n', '')
-            offer['offerdesc'] = offertag.xpath(
-                promo_desc).extract_first().replace('  ', '').replace(
-                    '\r\n', '').replace('\n', '')
-            offer['producturl'] = base_url + offertag.xpath(
-                prod_url).extract_first()
-            offer['offerurl'] = base_url + offertag.xpath(
-                promo_url).extract_first()
-            offer['productprice'] = offertag.xpath(
-                price).extract_first().replace('  ', '').replace('\r\n',
-                                                                 '').replace(
-                                                                     '\n', '')
-            offer['unitprice'] = offertag.xpath(unit_price).extract_first()
-            morrioffers.append(offer)
+            if(offertag.xpath(img_src).extract_first() is not None):
+                offer = MorrisonsOfferItem()
+                offer['imgsrcl'] = base_url + offertag.xpath(
+                    img_src).extract_first()
+                offer['productdesc'] = offertag.xpath(
+                    prod_desc).extract_first().replace('  ', '').replace(
+                        '\r\n', '').replace('\n', '')
+                offer['offerdesc'] = offertag.xpath(
+                    promo_desc).extract_first().replace('  ', '').replace(
+                        '\r\n', '').replace('\n', '')
+                offer['producturl'] = base_url + offertag.xpath(
+                    prod_url).extract_first()
+                offer['offerurl'] = base_url + offertag.xpath(
+                    promo_url).extract_first()
+                offer['productprice'] = offertag.xpath(
+                    price).extract_first().replace('  ', '').replace('\r\n',
+                                                                     '').replace(
+                                                                         '\n', '')
+                offer['unitprice'] = offertag.xpath(unit_price).extract_first()
+                morrioffers.append(offer)
+            else:
+                print(offertag.extract())
 
         return morrioffers
 
