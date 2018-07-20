@@ -175,22 +175,40 @@ if __name__ == '__main__':
     conx = connect()
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--type', help='Retailer name', required=True)
+    parser.add_argument('-d', '--date', help='File date in format YYYYMMDD \
+                                              to process', required=False)
     args = vars(parser.parse_args())
 
-    if args['type'] == 'tesco':
-        json_file = '/opt/offers/TESC_' + get_file_name(conx, 'tesco') + '.json'
-    elif args['type'] == 'sains':
-        json_file = '/opt/offers/SAINS_' + get_file_name(conx, 'sains') + '.json'
-    elif args['type'] == 'morri':
-        json_file = '/opt/offers/MORRI_' + get_file_name(conx, 'morri') + '.json'
-    elif args['type'] == 'occad':
-        json_file = '/opt/offers/OCCAD_' + get_file_name(conx, 'occad') + '.json'
-    elif args['type'] == 'asda':
-        json_file = '/opt/offers/ASDA_' + get_file_name(conx, 'asda') + '.json'
+    if args['date'] is None:
+        if args['type'] == 'tesco':
+            json_file = '/opt/offers/TESC_' + get_file_name(conx, 'tesco') + '.json'
+        elif args['type'] == 'sains':
+            json_file = '/opt/offers/SAINS_' + get_file_name(conx, 'sains') + '.json'
+        elif args['type'] == 'morri':
+            json_file = '/opt/offers/MORRI_' + get_file_name(conx, 'morri') + '.json'
+        elif args['type'] == 'occad':
+            json_file = '/opt/offers/OCCAD_' + get_file_name(conx, 'occad') + '.json'
+        elif args['type'] == 'asda':
+            json_file = '/opt/offers/ASDA_' + get_file_name(conx, 'asda') + '.json'
+        else:
+            logger.error("Invalid retailer name provided")
+            conx.close()
+            sys.exit(0)
     else:
-        logger.error("Invalid retailer name provided")
-        conx.close()
-        sys.exit(0)
+        if args['type'] == 'tesco':
+            json_file = '/opt/offers/TESC_' + args['date'] + '.json'
+        elif args['type'] == 'sains':
+            json_file = '/opt/offers/SAINS_' + args['date'] + '.json'
+        elif args['type'] == 'morri':
+            json_file = '/opt/offers/MORRI_' + args['date'] + '.json'
+        elif args['type'] == 'occad':
+            json_file = '/opt/offers/OCCAD_' + args['date'] + '.json'
+        elif args['type'] == 'asda':
+            json_file = '/opt/offers/ASDA_' + args['date'] + '.json'
+        else:
+            logger.error("Invalid retailer name provided")
+            conx.close()
+            sys.exit(0)
     logger.info('working on ' + json_file + ' ...')
     if os.path.isfile(json_file):
         if args['type'] == 'tesco':
