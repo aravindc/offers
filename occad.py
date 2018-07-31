@@ -3,14 +3,14 @@ import requests
 from scrapy.crawler import CrawlerProcess
 from scrapy.item import Field
 from scrapy.selector import Selector
-# import logging
+#import logging
 import json
 from datetime import datetime
 import os
 
 # Initialize logger
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
+#logging.basicConfig(level=logging.INFO)
+#logger = logging.getLogger(__name__)
 
 
 class OccadoOfferItem(scrapy.Item):
@@ -25,7 +25,7 @@ class OccadoOfferItem(scrapy.Item):
 
 class OccadoSpider(scrapy.Spider):
     def getChildCatUrls():
-        categories = [
+        categories = [ 
             '20002', '20424', '25189', '20911', '20977', '43510', '30932',
             '21584', '36203', '21276', '30489', '30930', '136434', '30931',
             '36202', '196461', '30941', '190566'
@@ -68,30 +68,28 @@ class OccadoSpider(scrapy.Spider):
 
     name = "occadoffer"    # Name of the spider, to be used when crawling
     allowed_domains = ["occado.com"]    # Where the spider is allowed to go
-    # start_urls = ['https://groceries.morrisons.com/webshop/
-    # getOfferProducts.do?tags=|105651|19998|104268|113925|113955&Asidebar=2']
+    # start_urls = ['https://www.ocado.com//webshop/getCategories.do?tags=|20000|19998|20002|42114|42119|42213&Asidebar=3']
     start_urls = getChildCatUrls()
 
     def parse(self, response):
         hxs = Selector(response)
-        product_grid = '//ul[contains(@class,"fops-shelf")]'
-        img_src = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+        product_grid = '//div[@class="main-column"]//ul[contains(@class,"fops-shelf")]'
+        img_src = './/li[@class=\
                    "fops-item"]//img/@src'
-        prod_desc = './/ul[contains(@class, "fops-shelf")]/li[@class=\
+        prod_desc = './/li[@class=\
                     "fops-item"]//div[@class="fop-description"]/\
-                    h4[contains(@class,"fop-title")]/span/text()'
-        prod_url = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+                    h4[contains(@class,"fop-title")]/@title'
+        prod_url = './/li[@class=\
                    "fops-item"]//div[contains(@class,\
                    "fop-contentWrapper")]/a/@href'
-        promo_desc = './/ul[contains(@class,"fops-shelf")]/\
-                     li[@class="fops-item"]//a[contains(@class,\
+        promo_desc = './/li[@class="fops-item"]//a[contains(@class,\
                      "fop-row-promo")]/span/text()'
-        promo_url = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+        promo_url = './/li[@class=\
                     "fops-item"]//a[contains(@class, "fop-row-promo")]/@href'
-        price = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+        price = './/li[@class=\
                 "fops-item"]//div[@class= "price-group-wrapper"]/\
                 span[contains(@class,"fop-price")]/text()'
-        unit_price = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+        unit_price = './/li[@class=\
                      "fops-item"]//div[@class= "price-group-wrapper"]/\
                      span[@class= "fop-unit-price"]/text()'
         offertags = hxs.xpath(product_grid)
@@ -100,24 +98,18 @@ class OccadoSpider(scrapy.Spider):
         base_url = 'https://www.occado.com'
         for offertag in offertags:
             offer = OccadoOfferItem()
-            offer['imgsrcl'] = base_url + offertag.xpath(
-                img_src).extract_first()
+            offer['imgsrcl'] = base_url + offertag.xpath(img_src).extract_first()
             offer['productdesc'] = offertag.xpath(prod_desc).extract_first()
             if offer['productdesc'] is not None:
-                offer['productdesc'] = offer['productdesc'].replace(
-                    '  ', '').replace('\r\n', '').replace('\n', '')
+                offer['productdesc'] = offer['productdesc'].replace('  ', '').replace('\r\n', '').replace('\n', '')
             offer['offerdesc'] = offertag.xpath(promo_desc).extract_first()
             if offer['offerdesc'] is not None:
-                offer['offerdesc'] = offer['offerdesc'].replace(
-                    '  ', '').replace('\r\n', '').replace('\n', '')
-            offer['producturl'] = base_url + offertag.xpath(
-                prod_url).extract_first()
-            offer['offerurl'] = base_url + offertag.xpath(
-                promo_url).extract_first()
+                offer['offerdesc'] = offer['offerdesc'].replace('  ', '').replace('\r\n', '').replace('\n', '')
+            offer['producturl'] = base_url + offertag.xpath(prod_url).extract_first()
+            offer['offerurl'] = base_url + offertag.xpath(promo_url).extract_first()
             offer['productprice'] = offertag.xpath(price).extract_first()
             if offer['productprice'] is not None:
-                offer['productprice'] = offer['productprice'].replace(
-                    '  ', '').replace('\r\n', '').replace('\n', '')
+                offer['productprice'] = offer['productprice'].replace('  ', '').replace('\r\n', '').replace('\n', '')
             offer['unitprice'] = offertag.xpath(unit_price).extract_first()
             occadoffers.append(offer)
 
