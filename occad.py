@@ -74,21 +74,26 @@ class OccadoSpider(scrapy.Spider):
 
     def parse(self, response):
         hxs = Selector(response)
-        product_grid = '//div[@id="js-productPageFops"]/ul/li'
-        img_src = './/div[@class="fop-item"]//img/@src'
-        prod_desc = './/div[@class="fop-item"]//div[@class= \
-                    "fop-description"]/h4[contains(@class,"fop-title")]/text()'
-        prod_url = './/div[@class="fop-item"]//div[contains(@class, \
-                   "fop-content-wrapper")]/a/@href'
-        promo_desc = './/div[@class="fop-item"]//a[contains(@class, \
+        product_grid = '//ul[contains(@class,"fops-shelf")]'
+        img_src = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+                   "fops-item"]//img/@src'
+        prod_desc = './/ul[contains(@class, "fops-shelf")]/li[@class=\
+                    "fops-item"]//div[@class="fop-description"]/\
+                    h4[contains(@class,"fop-title")]/span/text()'
+        prod_url = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+                   "fops-item"]//div[contains(@class,\
+                   "fop-contentWrapper")]/a/@href'
+        promo_desc = './/ul[contains(@class,"fops-shelf")]/\
+                     li[@class="fops-item"]//a[contains(@class,\
                      "fop-row-promo")]/span/text()'
-        promo_url = './/div[@class="fop-item"]//a[contains(@class, \
-                    "fop-row-promo")]/@href'
-        price = './/div[@class="fop-item"]//div[@class= \
-                "price-group-wrapper"]/h5[contains(@class,"fop-price")]/text()'
-        unit_price = './/div[@class="fop-item"]//div[@class= \
-                     "price-group-wrapper"]/span[@class= \
-                     "fop-unit-price"]/text()'
+        promo_url = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+                    "fops-item"]//a[contains(@class, "fop-row-promo")]/@href'
+        price = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+                "fops-item"]//div[@class= "price-group-wrapper"]/\
+                span[contains(@class,"fop-price")]/text()'
+        unit_price = './/ul[contains(@class,"fops-shelf")]/li[@class=\
+                     "fops-item"]//div[@class= "price-group-wrapper"]/\
+                     span[@class= "fop-unit-price"]/text()'
         offertags = hxs.xpath(product_grid)
 
         occadoffers = []
