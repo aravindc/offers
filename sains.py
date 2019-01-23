@@ -24,6 +24,7 @@ class SainsburysOfferItem(scrapy.Item):
     priceunit = Field()
 
 # Listed all product categories
+# 410380 - Special Offers
 # 12518 - Fruit & vegetables
 # 13343 - Meat & fish
 # 387873 - Dairy, eggs & juice
@@ -45,7 +46,8 @@ class MySpider(scrapy.Spider):
         sains_start_url = []
         # Added BWS category code to the list
         # Dairy code changed from 267396 to Dairy, Eggs & Juice -  387873
-        categoryId = [12518, 13343, 387873, 267397, 12320, 218831, 12422, 340854, 
+        # Added Special offers - 410380
+        categoryId = [410380, 12518, 13343, 387873, 267397, 12320, 218831, 12422, 340854, 
                       12192, 12448, 11651, 12564, 12298, 281806]
         # categoryId=[12518]
         # categoryId=[12518,13343,12422]

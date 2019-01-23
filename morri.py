@@ -3,14 +3,14 @@ import requests
 from scrapy.crawler import CrawlerProcess
 from scrapy.item import Field
 from scrapy.selector import Selector
-# import logging
+#import logging
 import json
 from datetime import datetime
 import os
 
 # Initialize logger
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
+#logging.basicConfig(level=logging.INFO)
+#logger = logging.getLogger(__name__)
 
 
 class MorrisonsOfferItem(scrapy.Item):
@@ -30,6 +30,7 @@ class MorrisonsSpider(scrapy.Spider):
             '102063', '166274', '103497', '102838', '166275', '103423',
             '102207', '150516', '153052'
         ]
+        
         # categories = ['104268', '104162']
         # categories = [104268]
         base_url = 'https://groceries.morrisons.com'
@@ -94,16 +95,17 @@ class MorrisonsSpider(scrapy.Spider):
         product_grid = '//div[@class="main-column"]/ul/li'
         img_src = './/div[@class="fop-contentWrapper"]//img/@src'
         prod_desc = './/div[@class="fop-contentWrapper"]//div[@class= \
-                    "fop-description"]/h4[contains(@class,"fop-title")]/a/span/text()'
-        prod_url = './/div[@class="fop-contentWrapper"]//div[@class= \
-                    "fop-description"]/h4[contains(@class,"fop-title")]/a/@href'
+                    "fop-description"]/h4[contains(@class,"fop-title")]/span/text()'
+        #prod_url = './/div[@class="fop-contentWrapper"]//div[@class= \
+        #            "fop-description"]/h4[contains(@class,"fop-title")]/a/@href'
+        prod_url = './/div[@class="fop-contentWrapper"]/a/@href'
         promo_desc = './/div[@class="fop-contentWrapper"]//a[contains(@class, \
                      "fop-row-promo")]/span/text()'
         promo_url = './/div[@class="fop-contentWrapper"]//a[contains(@class, \
                     "fop-row-promo")]/@href'
         price = './/div[@class="fop-contentWrapper"]//div[@class= \
-                     "price-group-wrapper"]/span[@class= \
-                     "fop-price"]/text()'
+                     "price-group-wrapper"]/span[contains(@class, \
+                     "fop-price")]/text()'
         unit_price = './/div[@class="fop-contentWrapper"]//div[@class= \
                      "price-group-wrapper"]/span[@class= \
                      "fop-unit-price"]/text()'
@@ -122,12 +124,10 @@ class MorrisonsSpider(scrapy.Spider):
                 offer['offerdesc'] = offertag.xpath(
                     promo_desc).extract_first().replace('  ', '').replace(
                         '\r\n', '').replace('\n', '')
-                offer['producturl'] = base_url + offertag.xpath(
-                    prod_url).extract_first()
+                offer['producturl'] = base_url + offertag.xpath(prod_url).extract_first()
                 offer['offerurl'] = base_url + offertag.xpath(
                     promo_url).extract_first()
-                offer['productprice'] = offertag.xpath(
-                    price).extract_first().replace('  ', '').replace('\r\n',
+                offer['productprice'] = offertag.xpath(price).extract_first().replace('  ', '').replace('\r\n',
                                                                      '').replace(
                                                                          '\n', '')
                 offer['unitprice'] = offertag.xpath(unit_price).extract_first()

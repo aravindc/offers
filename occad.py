@@ -3,14 +3,14 @@ import requests
 from scrapy.crawler import CrawlerProcess
 from scrapy.item import Field
 from scrapy.selector import Selector
-#import logging
+import logging
 import json
 from datetime import datetime
 import os
 
 # Initialize logger
-#logging.basicConfig(level=logging.INFO)
-#logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class OccadoOfferItem(scrapy.Item):
@@ -25,12 +25,12 @@ class OccadoOfferItem(scrapy.Item):
 
 class OccadoSpider(scrapy.Spider):
     def getChildCatUrls():
-        categories = [ 
-            '20002', '20424', '25189', '20911', '20977', '43510', '30932',
-            '21584', '36203', '21276', '30489', '30930', '136434', '30931',
-            '36202', '196461', '30941', '190566'
-        ]
-        # categories = ['20002']
+        #categories = [ 
+        #    '20002', '20424', '25189', '20911', '20977', '43510', '30932',
+        #    '21584', '36203', '21276', '30489', '30930', '136434', '30931',
+        #    '36202', '196461', '30941', '190566'
+        #]
+        categories = ['20002']
         base_url = 'https://www.ocado.com/'
         base_cat_url = base_url + '/webshop/subNavigation?catalogueType= \
                                   OFFER_PRODUCTS&tags=|20000|19998|%s'
