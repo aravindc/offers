@@ -74,10 +74,13 @@ def getOffers(skuUrls):
                 loc_price = obj['price']['current']
                 if 'unit' in obj['price']:
                     loc_unit_price = obj['price']['unit']['price']
-                    loc_unit = obj['price']['unit']['per']
+                    if 'per' in obj['price']['unit']:
+                        loc_unit = obj['price']['unit']['per']
+                    else:
+                        loc_unit = 'N/A'
                 else:
-                    loc_unit_price = "N/A"
-                    loc_unit = "N/A"
+                    loc_unit_price = 'N/A'
+                    loc_unit = 'N/A'
                 loc_category = obj['mainCategory']
                 repl_chars = '£ ,!"^&*()%'
                 loc_offtext = obj['offer']['text'].lower()
