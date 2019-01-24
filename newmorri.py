@@ -90,7 +90,10 @@ def getOffers(skuUrls):
                 for char in repl_chars:
                     loc_offtext = loc_offtext.replace(char, '-')
                 loc_offtext = loc_offtext.replace('--', '-')
-                loc_offid = obj['offer']['id']
+                if 'id' in obj['offer']:
+                    loc_offid = obj['offer']['id']
+                else:
+                    loc_offid = ''
 
             logger.info(loc_sku)
             json_data['prod_sku'] = loc_sku
