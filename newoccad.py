@@ -5,6 +5,7 @@ import os
 import requests
 import io
 import time
+from messageq import *
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +18,8 @@ logger = logging.getLogger(__name__)
 logger.addHandler(hdlr)
 
 FILE_NAME = '/opt/offers/OCCAD_' + datetime.now().strftime("%Y%m%d") + '.json'
+exchangeName = 'Occado'
+queueName = '{0}-{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 
 occado_urls = {
     "base_url": "https://www.ocado.com/webshop/api/v1/browse?tags=19998",
@@ -30,13 +33,16 @@ occado_urls = {
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
+
 def getSkuUrls(skus):
     sku_urls = []
-    for sku in chunker(skus,20):
-        sku_urls.append(occado_urls['sku_base'].format(",".join(str(x) for x in sku)))
+    for sku in chunker(skus, 20):
+        sku_urls.append(occado_urls['sku_base'].format(
+            ",".join(str(x) for x in sku)))
     return sku_urls
 
-def getOffers(skuUrls):
+
+def getOffers(skuUrls, channel):
 
     for skuUrl in skuUrls:
         response = requests.get(skuUrl)
@@ -54,19 +60,19 @@ def getOffers(skuUrls):
             if 'product' in obj:
                 loc_sku = obj['product']['sku']
                 loc_name = obj['product']['name']
-                loc_price = obj['product']['price']['current']       
+                loc_price = obj['product']['price']['current']
                 if 'unit' in obj['product']['price']:
                     loc_unit_price = obj['product']['price']['unit']['price']
                     loc_unit = obj['product']['price']['unit']['per']
                 else:
-                    loc_unit_price="N/A"
-                    loc_unit="N/A"
+                    loc_unit_price = "N/A"
+                    loc_unit = "N/A"
                 loc_category = obj['product']['mainCategory']
                 repl_chars = '£ ,!"^&*()%'
                 loc_offtext = obj['product']['offer']['text'].lower()
                 for char in repl_chars:
                     loc_offtext = loc_offtext.replace(char, '-')
-                loc_offtext = loc_offtext.replace('--','-')     
+                loc_offtext = loc_offtext.replace('--', '-')
                 loc_offid = obj['product']['offer']['id']
             else:
                 loc_sku = obj['sku']
@@ -97,7 +103,8 @@ def getOffers(skuUrls):
             json_data['prod_name'] = loc_name
             json_data['prod_url'] = occado_urls['prod_base'].format(
                 loc_name.replace(' ', '-'), loc_sku)
-            json_data['promo_url'] = occado_urls['promo_base'].format(loc_offtext, loc_offid)
+            json_data['promo_url'] = occado_urls['promo_base'].format(
+                loc_offtext, loc_offid)
             json_data['prod_150_img'] = occado_urls['img_base'].format(
                 loc_sku, 150, 150, loc_sku[:3])
             json_data['prod_640_img'] = occado_urls['img_base'].format(
@@ -107,8 +114,9 @@ def getOffers(skuUrls):
             json_data['prod_unit'] = loc_unit
             json_data['category'] = loc_category
             json_data['ins_dt'] = datetime.now().strftime("%Y%m%d")
+            sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
-        time.sleep(10)
+        time.sleep(3)
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data
@@ -123,6 +131,7 @@ def getSkuList():
         sku_list.append(obj['sku'])
     return sku_list
 
+
 def genOutputFile(offerProducts):
     try:
         os.remove(FILE_NAME)
@@ -131,9 +140,11 @@ def genOutputFile(offerProducts):
     with io.open(FILE_NAME, 'w+', encoding='utf-8') as outfile:
         json.dump(offerProducts, outfile, ensure_ascii=False)
 
+
 if __name__ == "__main__":
+    channel, connection = openConnection(exchangeName, queueName)
     skuList = getSkuList()
     skuUrls = getSkuUrls(skuList)
-    #logger.info(skuUrls)
-    offerProducts = getOffers(skuUrls)
-    genOutputFile(offerProducts)
+    offerProducts = getOffers(skuUrls, channel)
+    messageToFile(queueName, fileName=FILE_NAME)
+    connection.close()

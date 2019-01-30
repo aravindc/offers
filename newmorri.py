@@ -1,10 +1,13 @@
 import logging
 import json
-from datetime import datetime
 import os
 import requests
 import io
 import time
+from datetime import datetime
+from messageq import sendMessage
+from messageq import openConnection
+from messageq import messageToFile
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +20,8 @@ logger = logging.getLogger(__name__)
 logger.addHandler(hdlr)
 
 FILE_NAME = '/opt/offers/MORRI_' + datetime.now().strftime("%Y%m%d") + '.json'
+exchangeName = 'Morrison'
+queueName = '{0}-{1}'.format(exchangeName,datetime.now().strftime("%Y%m%d"))
 
 occado_urls = {
     "base_url": "https://groceries.morrisons.com/webshop/api/v1/browse?tags=19998",
@@ -39,7 +44,7 @@ def getSkuUrls(skus):
     return sku_urls
 
 
-def getOffers(skuUrls):
+def getOffers(skuUrls, channel):
 
     for skuUrl in skuUrls:
         response = requests.get(skuUrl)
@@ -111,8 +116,9 @@ def getOffers(skuUrls):
             json_data['prod_unit'] = loc_unit
             json_data['category'] = loc_category
             json_data['ins_dt'] = datetime.now().strftime("%Y%m%d")
+            sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
-        time.sleep(10)
+        time.sleep(3)
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data
@@ -121,9 +127,9 @@ def getOffers(skuUrls):
 def getSkuList():
     response = requests.get(occado_urls['base_url'])
     json_obj = json.loads(response.text)
-    logger.info(len(json_obj['mainFopCollection']['sections'][0]['fops']))
+    logger.info(len(json_obj['mainFopCollection']['sections'][1]['fops']))
     sku_list = []
-    for obj in json_obj['mainFopCollection']['sections'][0]['fops']:
+    for obj in json_obj['mainFopCollection']['sections'][1]['fops']:
         sku_list.append(obj['sku'])
     return sku_list
 
@@ -138,8 +144,9 @@ def genOutputFile(offerProducts):
 
 
 if __name__ == "__main__":
+    channel, connection = openConnection(exchangeName, queueName)
     skuList = getSkuList()
     skuUrls = getSkuUrls(skuList)
-    #logger.info(skuUrls)
-    offerProducts = getOffers(skuUrls)
-    genOutputFile(offerProducts)
+    offerProducts = getOffers(skuUrls, channel)
+    messageToFile(queueName, fileName=FILE_NAME)
+    connection.close()
