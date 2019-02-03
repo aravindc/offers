@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 logger.addHandler(hdlr)
 
 FILE_NAME = '/opt/offers/MORRI_' + datetime.now().strftime("%Y%m%d") + '.json'
-exchangeName = 'Morrison'
-queueName = '{0}-{1}'.format(exchangeName,datetime.now().strftime("%Y%m%d"))
+exchangeName = 'MORRI'
+queueName = '{0}_{1}'.format(exchangeName,datetime.now().strftime("%Y%m%d"))
 
 occado_urls = {
     "base_url": "https://groceries.morrisons.com/webshop/api/v1/browse?tags=19998",
@@ -119,6 +119,7 @@ def getOffers(skuUrls, channel):
             sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
         time.sleep(3)
+        break
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data

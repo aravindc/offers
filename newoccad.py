@@ -18,17 +18,29 @@ logger = logging.getLogger(__name__)
 logger.addHandler(hdlr)
 
 FILE_NAME = '/opt/offers/OCCAD_' + datetime.now().strftime("%Y%m%d") + '.json'
-exchangeName = 'Occado'
-queueName = '{0}-{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
+exchangeName = 'OCCAD'
+queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 
 occado_urls = {
     "base_url": "https://www.ocado.com/webshop/api/v1/browse?tags=19998",
     "img_base": "https://www.ocado.com/productImages/{3}/{0}_0_{1}x{2}.jpg",
     "prod_base": "https://www.ocado.com/webshop/product/{0}/{1}",
     "promo_base": "https://www.ocado.com/webshop/promotion/{0}/{1}",
-    "sku_base": "https://www.ocado.com/webshop/api/v1/products?skus={0}"
+    "sku_base": "https://www.ocado.com/webshop/api/v1/products?skus={0}",
+    "cat_url": "https://www.ocado.com/webshop/api/v1/subnavigation?catalogueType=OFFER_PRODUCTS",
+    "promo_url": "https://www.ocado.com/webshop/api/v1/on-offer?tags={0}"
 }
 
+
+def getCategories():
+    response = requests.get(occado_urls['cat_url'])
+    json_obj = json.loads(response.text)
+    categories = []
+    for obj in json_obj:
+        json_o = {"id": obj['id'],"name": obj['name']}
+        categories.append(json_o)
+        logger.info("{0} - {1}".format(obj['id'],obj['name']))
+    return categories
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -117,18 +129,22 @@ def getOffers(skuUrls, channel):
             sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
         time.sleep(3)
+        break
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data
 
 
-def getSkuList():
-    response = requests.get(occado_urls['base_url'])
-    json_obj = json.loads(response.text)
-    logger.info(len(json_obj['mainFopCollection']['sections'][0]['fops']))
-    sku_list = []
-    for obj in json_obj['mainFopCollection']['sections'][0]['fops']:
-        sku_list.append(obj['sku'])
+def getSkuList(categories):
+    for category in categories:
+        logger.info("working on {0}".format(
+            occado_urls['promo_url'].format(category['id'])))
+        response = requests.get(occado_urls['promo_url'].format(category['id']))
+        json_obj = json.loads(response.text)
+        sku_list = []
+        for section in json_obj['mainFopCollection']['sections']:
+            for sku in section['fops']:
+                sku_list.append(sku['sku'])
     return sku_list
 
 
@@ -143,7 +159,9 @@ def genOutputFile(offerProducts):
 
 if __name__ == "__main__":
     channel, connection = openConnection(exchangeName, queueName)
-    skuList = getSkuList()
+    categories = getCategories()
+    skuList = getSkuList(categories)
+    logger.info(len(skuList))
     skuUrls = getSkuUrls(skuList)
     offerProducts = getOffers(skuUrls, channel)
     messageToFile(queueName, fileName=FILE_NAME)
