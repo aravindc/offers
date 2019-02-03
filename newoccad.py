@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import json
 from datetime import datetime
@@ -129,19 +130,19 @@ def getOffers(skuUrls, channel):
             sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
         time.sleep(3)
-        break
+        #break
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data
 
 
 def getSkuList(categories):
+    sku_list = []
     for category in categories:
-        logger.info("working on {0}".format(
-            occado_urls['promo_url'].format(category['id'])))
+        logger.info("working on {0} - {1}".format(
+            occado_urls['promo_url'].format(category['id']), category['name']))
         response = requests.get(occado_urls['promo_url'].format(category['id']))
         json_obj = json.loads(response.text)
-        sku_list = []
         for section in json_obj['mainFopCollection']['sections']:
             for sku in section['fops']:
                 sku_list.append(sku['sku'])

@@ -11,3 +11,4 @@ ormtest.py
 test.py
 requirements.txt
 .idea
+*.pyc
