@@ -90,7 +90,12 @@ def getOffers(skuUrls, channel):
             else:
                 loc_sku = obj['sku']
                 loc_name = obj['name']
-                loc_price = obj['price']['current']
+                if 'current' in obj['price']:
+                    loc_price = obj['price']['current']
+                elif 'unit' in obj['price']:
+                    loc_price = obj['price']['unit']['price']
+                else:
+                    loc_price='error'
                 if 'unit' in obj['price']:
                     loc_unit_price = obj['price']['unit']['price']
                     if 'per' in obj['price']['unit']:
