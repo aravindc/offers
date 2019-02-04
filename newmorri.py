@@ -119,7 +119,7 @@ def getOffers(skuUrls, channel):
             sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
         time.sleep(3)
-        break
+        #break
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data
@@ -149,5 +149,5 @@ if __name__ == "__main__":
     skuList = getSkuList()
     skuUrls = getSkuUrls(skuList)
     offerProducts = getOffers(skuUrls, channel)
-    messageToFile(queueName, fileName=FILE_NAME)
+    #messageToFile(queueName, fileName=FILE_NAME)
     connection.close()

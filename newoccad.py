@@ -6,7 +6,9 @@ import os
 import requests
 import io
 import time
-from messageq import *
+from messageq import openConnection
+from messageq import sendMessage
+from messageq import messageToFile
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)
@@ -170,5 +172,5 @@ if __name__ == "__main__":
     logger.info(len(skuList))
     skuUrls = getSkuUrls(skuList)
     offerProducts = getOffers(skuUrls, channel)
-    messageToFile(queueName, fileName=FILE_NAME)
+    #messageToFile(queueName, fileName=FILE_NAME)
     connection.close()
