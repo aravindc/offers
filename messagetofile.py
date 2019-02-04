@@ -19,7 +19,7 @@ if __name__ == "__main__":
         queue_name = json_queue['name']
         logger.info(queue_name)
         if json_queue['messages_ready']:
-            messageToFile(queue_name,'c:/opt/offers/{0}.json'.format(queue_name))
+            messageToFile(queue_name,'/opt/offers/{0}.json'.format(queue_name))
         else:
             logger.info('{} is empty'.format(queue_name))
             continue
