@@ -41,8 +41,8 @@ def messageToFile(queueName, fileName):
     except OSError:
         pass
     with io.open(fileName, 'w+', encoding='utf-8') as outfile:
-        json.dump(jsonOutput, outfile, ensure_ascii=False)
-        outfile.write('\n')
+        json.dump(jsonOutput, outfile, ensure_ascii=False,
+                  sort_keys=True, indent=4)
 
 
 def on_message(channel, method_frame, header_frame, body):
