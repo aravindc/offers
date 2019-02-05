@@ -1,7 +1,7 @@
 import requests
 import json
 import math
-from datetime import time
+import time
 from datetime import datetime
 from messageq import openConnection
 from messageq import sendMessage
