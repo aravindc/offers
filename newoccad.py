@@ -172,5 +172,5 @@ if __name__ == "__main__":
     logger.info(len(skuList))
     skuUrls = getSkuUrls(skuList)
     offerProducts = getOffers(skuUrls, channel)
-    #messageToFile(queueName, fileName=FILE_NAME)
+    messageToFile(queueName, fileName=FILE_NAME)
     connection.close()

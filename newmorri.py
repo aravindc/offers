@@ -23,6 +23,14 @@ FILE_NAME = '/opt/offers/MORRI_' + datetime.now().strftime("%Y%m%d") + '.json'
 exchangeName = 'MORRI'
 queueName = '{0}_{1}'.format(exchangeName,datetime.now().strftime("%Y%m%d"))
 
+http_proxy = "http://localhost:8123"
+https_proxy = "https://localhost:8123"
+
+proxyDict = {
+    "http": http_proxy,
+    "https": https_proxy,
+}
+
 occado_urls = {
     "base_url": "https://groceries.morrisons.com/webshop/api/v1/browse?tags=19998",
     "img_base": "https://groceries.morrisons.com/productImages/{3}/{0}_0_{1}x{2}.jpg",
@@ -47,7 +55,7 @@ def getSkuUrls(skus):
 def getOffers(skuUrls, channel):
 
     for skuUrl in skuUrls:
-        response = requests.get(skuUrl)
+        response = requests.get(skuUrl, proxies=proxyDict)
         json_obj = json.loads(response.text)
         full_data = []
         missing_data = []
@@ -119,15 +127,16 @@ def getOffers(skuUrls, channel):
             sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
         time.sleep(3)
-        #break
+        break
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data
 
 
 def getSkuList():
-    response = requests.get(occado_urls['base_url'])
+    response = requests.get(occado_urls['base_url'], proxies=proxyDict)
     json_obj = json.loads(response.text)
+    logger.info(json_obj)
     logger.info(len(json_obj['mainFopCollection']['sections'][1]['fops']))
     sku_list = []
     for obj in json_obj['mainFopCollection']['sections'][1]['fops']:
@@ -149,5 +158,5 @@ if __name__ == "__main__":
     skuList = getSkuList()
     skuUrls = getSkuUrls(skuList)
     offerProducts = getOffers(skuUrls, channel)
-    #messageToFile(queueName, fileName=FILE_NAME)
+    messageToFile(queueName, fileName=FILE_NAME)
     connection.close()

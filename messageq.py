@@ -4,24 +4,29 @@ import json
 import time
 import os
 import io
+import hashlib
 from datetime import datetime
 
 def openConnection(exchangeName, queueName):
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
-    channel.exchange_declare(exchange=exchangeName, exchange_type='direct', passive=False, durable=True)
+    channel.exchange_declare(exchange=exchangeName, passive=False, durable=True, 
+                             exchange_type='direct')
     channel.queue_declare(
-        queue=queueName, durable=True)
+        queue=queueName, durable=True, arguments={"x-message-deduplication": True, "x-cache-persistence":"disk"})
     channel.queue_bind(queue=queueName, exchange=exchangeName, routing_key=queueName)
     return channel, connection
 
 
 def sendMessage(exchangeName, queueName, jsonData, channel):
+    header = hashlib.md5(str(jsonData).encode()).hexdigest()
+    print(header)
     channel.basic_publish(exchange=exchangeName, routing_key=queueName, body=json.dumps(jsonData),
                           properties=pika.BasicProperties(
-        delivery_mode=2,  # make message persistent
-    ))
+                              delivery_mode=2,  # make message persistent
+                              headers={'x-deduplication-header': header},
+                              ))
 
 
 def messageToFile(queueName, fileName):
