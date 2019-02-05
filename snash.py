@@ -2,17 +2,19 @@ import requests
 import json
 import math
 import time
+import logging
 from datetime import datetime
 from messageq import openConnection
 from messageq import sendMessage
 
-
-us_body = json.dumps({"binary": "web-ecom", "binary_version": "2.11.27-hotfix", "is_retina": "false",
-           "os_version": "Win32", "pixel_density": "1.0", "push_token": "", "screen_height": 1080, "screen_width": 1920})
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 items = []
 exchangeName = 'SNASH'
 queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
+us_body = json.dumps({"binary": "web-ecom", "binary_version": "2.11.27-hotfix", "is_retina": "false",
+                      "os_version": "Win32", "pixel_density": "1.0", "push_token": "", "screen_height": 1080, "screen_width": 1920})
 
 http_proxy = "http://localhost:8123"
 https_proxy = "https://localhost:8123"
@@ -23,10 +25,11 @@ proxyDict = {
 }
 
 
-def proxyRequest(url, method, header, inputdata=None):
+def proxyRequest(url, method, header, inputdata):
     time.sleep(5)
+    logger.info('Connecting to {0}'.format(url))
     if method == 'post':
-        return requests.post(url, proxies=proxyDict, headers=header, data=inputdata)
+        return requests.post(url=url, proxies=proxyDict, headers=header, data=inputdata)
     elif method == 'get':
         return requests.get(url=url, proxies=proxyDict, headers=header, data=inputdata)
     # return requests.get(url)
@@ -42,6 +45,7 @@ def getSessionToken():
 def getUser(session_token):
     header_data = {"Authorization": "Bearer {0}".format(session_token)}
     response = proxyRequest('https://www.shopthefastlane.com/api/v2/users', 'post', header_data, None)
+    logger.info(response.text)
     json_output = json.loads(response.text)
     return json_output['session_token']
 
@@ -49,6 +53,7 @@ def getItemCount(session_token):
     header_data = {"Authorization": "Bearer {0}".format(session_token)}
     response = proxyRequest(
         'https://www.shopthefastlane.com/api/v2/store_products?limit=1&offset=0&sort=alpha&tags=has_coupon','get',header_data, None)
+    logger.info(response.text)
     json_output = json.loads(response.text)
     return json_output['item_count']
 
