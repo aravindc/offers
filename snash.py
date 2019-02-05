@@ -37,7 +37,7 @@ def proxyRequest(url, method, header, inputdata):
 def getSessionToken():
     header_data = {"Content-type": "application/json"}
     response = proxyRequest( 
-        'https://www.shopthefastlane.com/api/v2/user_sessions', 'get',header_data, us_body)
+        'https://www.shopthefastlane.com/api/v2/user_sessions', 'post',header_data, us_body)
     json_output = json.loads(response.text)
     print(json_output)
     return json_output['session_token']
