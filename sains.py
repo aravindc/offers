@@ -48,7 +48,7 @@ exchangeName = 'SAINS'
 queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 
 class MySpider(scrapy.Spider):
-    def getSainsStartUrl(self):
+    def getSainsStartUrl():
         sains_start_url = []
         # Added BWS category code to the list
         # Dairy code changed from 267396 to Dairy, Eggs & Juice -  387873
@@ -76,7 +76,7 @@ class MySpider(scrapy.Spider):
                 sains_start_url.append(urlstring % (n, n, i*108))
         return sains_start_url
 
-    def sendMessageToQ(self, offer):
+    def sendMessageToQ(offer):
         channel, connection = openConnection(exchangeName, queueName)
         sendMessage(exchangeName, queueName, offer, channel)
         connection.close()
