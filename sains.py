@@ -8,6 +8,9 @@ from scrapy.selector import Selector
 from scrapy.item import Field
 from urllib.parse import urlsplit, parse_qs
 from datetime import datetime
+from messageq import openConnection
+from messageq import sendMessage
+from messageq import messageToFile
 
 
 #  Initialize logger
@@ -41,8 +44,11 @@ class SainsburysOfferItem(scrapy.Item):
 # 12298 - Pet
 
 
+exchangeName = 'SAINS'
+queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
+
 class MySpider(scrapy.Spider):
-    def getSainsStartUrl():
+    def getSainsStartUrl(self):
         sains_start_url = []
         # Added BWS category code to the list
         # Dairy code changed from 267396 to Dairy, Eggs & Juice -  387873
@@ -70,8 +76,13 @@ class MySpider(scrapy.Spider):
                 sains_start_url.append(urlstring % (n, n, i*108))
         return sains_start_url
 
+    def sendMessageToQ(self, offer):
+        channel, connection = openConnection(exchangeName, queueName)
+        sendMessage(exchangeName, queueName, offer, channel)
+        connection.close()
+
     name = "sainsoffer"  # Name of the spider, to be used when crawling
-    allowed_domains = ["sainsburys.co.uk"]  # Where the spider is allowed to go
+    allowed_domains = ["sainsburys.co.uk"]  # Where the spider is allowed to go   
     start_urls = getSainsStartUrl()
 
     def parse(self, response):
@@ -109,6 +120,7 @@ class MySpider(scrapy.Spider):
                                          .replace('\r\n', '') \
                                          .replace('\n', '')
             sainsoffers.append(offer)
+            sendMessageToQ(offer)
         return sainsoffers
 
 
