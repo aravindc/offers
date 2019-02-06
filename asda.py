@@ -8,6 +8,9 @@ import os
 import io
 import urllib.parse as urlparse
 from datetime import datetime
+from messageq import openConnection
+from messageq import sendMessage
+from messageq import messageToFile
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_FILE = '/opt/offers/logs/ASDA_' + datetime.now().strftime("%Y%m%d") + '.log'
@@ -16,6 +19,18 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger = logging.getLogger(__name__)
 logger.addHandler(hdlr)
+
+FILE_NAME = '/opt/offers/ASDA_' + datetime.now().strftime("%Y%m%d") + '.json'
+exchangeName = 'ASDA'
+queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
+
+http_proxy = "http://localhost:8123"
+https_proxy = "https://localhost:8123"
+
+proxyDict = {
+    "http": http_proxy,
+    "https": https_proxy,
+}
 
 asda_urls = {
     "base_url": "https://groceries.asda.com",
@@ -31,14 +46,6 @@ asda_urls = {
     }
 
 all_urls = json.loads(json.dumps(asda_urls))
-
-http_proxy = "http://localhost:8123"
-https_proxy = "https://localhost:8123"
-
-proxyDict = {
-              "http": http_proxy,
-              "https": https_proxy,
-            }
 
 # https://groceries.asda.com/special-offers/all-offers/by-category/103099
 # https://groceries.asda.com/cmscontent/json/pages/special-offers/all-offers/by-category?Endeca_user_segments=anonymous%7Cstore_4565%7Cwapp%7Cvp_XXL%7CZero_Order_Customers%7CDelivery_Pass_Older_Than_12_Months%7Cdp-false%7C1007%7C1019%7C1020%7C1023%7C1024%7C1027%7C1038%7C1041%7C1042%7C1043%7C1047%7C1053%7C1055%7C1057%7C1059%7C1067%7C1070%7C1082%7C1087%7C1097%7C1098%7C1099%7C1100%7C1102%7C1105%7C1107%7C1109%7C1110%7C1111%7C1112%7C1116%7C1117%7C1119%7C1123%7C1124%7C1126%7C1128%7C1130%7C1140%7C1141&storeId=4565&shipDate=1528074000000&N=103099&Nrpp=60&No=0&requestorigin=gi&_=1528125877201
@@ -110,7 +117,7 @@ def getItemIds(categories):
     return allCat
 
 
-def getItemDetails(allCat):
+def getItemDetails(allCat, channel):
     regx = re.compile('[^a-zA-Z0-9 ]')
     totalItems = []
     for category in allCat:
@@ -153,19 +160,24 @@ def getItemDetails(allCat):
                     tmpItem['thumbnailImage'] = ''
                     tmpItem['largeImage'] = ''
                 tmpItem['ins_ts'] = datetime.now().strftime("%Y-%m-%d")
+                sendMessage(exchangeName, queueName, tmpItem, channel)
                 totalItems.append(tmpItem)
-    logger.debug(totalItems)
+    #logger.debug(totalItems)
     return totalItems
 
 
-if __name__ == '__main__':
-    categories = getCategories()
-    itemIds = getItemIds(categories)
-    offerProducts = getItemDetails(itemIds)
-    FILE_NAME = '/opt/offers/ASDA_' + datetime.now().strftime("%Y%m%d") + '.json'
+def genOutputFile(offerProducts):
     try:
         os.remove(FILE_NAME)
     except OSError:
         pass
     with io.open(FILE_NAME, 'w+', encoding='utf-8') as outfile:
         json.dump(offerProducts, outfile, ensure_ascii=False)
+
+if __name__ == '__main__':
+    channel, connection = openConnection(exchangeName, queueName)
+    categories = getCategories()
+    itemIds = getItemIds(categories)
+    offerProducts = getItemDetails(itemIds, channel)
+    messageToFile(queueName, fileName=FILE_NAME)
+    connection.close()
