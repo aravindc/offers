@@ -64,9 +64,9 @@ class MySpider(scrapy.Spider):
         for n in categoryId:
             print("Working on {0}".format(urlstring % (n,n,0)))
             r = requests.get(urlstring % (n, n, 0))
+            print(r)
             data = lxml.html.fromstring(r.text)
-            output = data.xpath('//h1[@id="resultsHeading"]/text()')
-            print(output)
+            output = data.xpath('//h1[@class="resultsHeading"]/text()')
             # item = output[0].replace('  ', '')
             # .replace('\r\n', '').split('(')[0]
             itemcount = output[0].replace('  ', '') \
@@ -132,7 +132,8 @@ try:
     os.remove(FILE_NAME)
 except OSError:
     pass
-os.environ["http_proxy"] = "http://localhost:8123"
+os.environ["http_proxy"] = "http://localhost:8118"
+os.environ["https_proxy"] = "http://localhost:8118"
 SETTINGS = {
     'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
     'FEED_EXPORT_ENCODING': 'utf-8',

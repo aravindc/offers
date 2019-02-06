@@ -12,7 +12,7 @@ from messageq import openConnection
 from messageq import sendMessage
 from messageq import messageToFile
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 LOG_FILE = '/opt/offers/logs/ASDA_' + datetime.now().strftime("%Y%m%d") + '.log'
 hdlr = logging.FileHandler(LOG_FILE)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
