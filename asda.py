@@ -93,7 +93,7 @@ def getCategories():
     return json_data
 
 
-def getItemIds(categories):
+def getItemIds(categories, channel):
     json_objs = json.loads(json.dumps(categories))
     allCat = []
     for json_obj in json_objs:
@@ -101,6 +101,7 @@ def getItemIds(categories):
         itemIds['category'] = json_obj['category']
         itemIds['sku_repoId'] = []
         logger.info('Working on {}'.format(itemIds['category']))
+        catItems = []
         for i in range(0, json_obj['count'], 60):
             time.sleep(5)
             logger.debug(all_urls['item_url'].format(json_obj['categoryId'], i))
@@ -112,6 +113,8 @@ def getItemIds(categories):
                     logger.debug(sku_record['attributes']['sku.repositoryId'])
             #break
         allCat.append(itemIds)
+        catItems.append(itemIds)
+        getItemDetails(catItems, channel)
         #break
     logger.debug(allCat)
     return allCat
@@ -177,7 +180,7 @@ def genOutputFile(offerProducts):
 if __name__ == '__main__':
     channel, connection = openConnection(exchangeName, queueName)
     categories = getCategories()
-    itemIds = getItemIds(categories)
-    offerProducts = getItemDetails(itemIds, channel)
+    itemIds = getItemIds(categories, channel)
+    #offerProducts = getItemDetails(itemIds, channel)
     messageToFile(queueName, fileName=FILE_NAME)
     connection.close()
