@@ -127,7 +127,7 @@ def getOffers(skuUrls, channel):
             sendMessage(exchangeName, queueName, json_data, channel)
             full_data.append(json_data)
         time.sleep(3)
-        break
+        #break
     logger.debug(missing_data)
     logger.debug(full_data)
     return full_data
@@ -137,9 +137,9 @@ def getSkuList():
     response = requests.get(occado_urls['base_url'], proxies=proxyDict)
     json_obj = json.loads(response.text)
     logger.info(json_obj)
-    logger.info(len(json_obj['mainFopCollection']['sections'][1]['fops']))
+    logger.info(len(json_obj['mainFopCollection']['sections'][0]['fops']))
     sku_list = []
-    for obj in json_obj['mainFopCollection']['sections'][1]['fops']:
+    for obj in json_obj['mainFopCollection']['sections'][0]['fops']:
         sku_list.append(obj['sku'])
     return sku_list
 

@@ -56,9 +56,11 @@ class MySpider(scrapy.Spider):
                     '10123&pageSize=108&facet=88&categoryId=%d&' \
                     'categoryFacetId1=%d&beginIndex=%d'
         for n in categoryId:
+            print("Working on {0}".format(urlstring % (n,n,0)))
             r = requests.get(urlstring % (n, n, 0))
             data = lxml.html.fromstring(r.text)
             output = data.xpath('//h1[@id="resultsHeading"]/text()')
+            print(output)
             # item = output[0].replace('  ', '')
             # .replace('\r\n', '').split('(')[0]
             itemcount = output[0].replace('  ', '') \
