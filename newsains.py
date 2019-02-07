@@ -2,6 +2,7 @@
 import requests
 import math
 import logging
+import time
 from datetime import datetime
 from messageq import openConnection
 from messageq import sendMessage
@@ -38,8 +39,8 @@ FILE_NAME = '/opt/offers/SAINS_' + datetime.now().strftime("%Y%m%d") + '.json'
 exchangeName = 'SAINS'
 queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 
-http_proxy = "http://localhost:8123"
-https_proxy = "https://localhost:8123"
+http_proxy = "http://localhost:8118"
+https_proxy = "https://localhost:8118"
 
 proxyDict = {
     "http": http_proxy,
@@ -77,8 +78,7 @@ def getSainsStartUrl():
         for n in categories:
             logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
             getCurrentIp()
-            r = requests.get(urlstring %
-                             (n['id'], n['id'], 0), proxies=proxyDict)
+            r = requests.get(urlstring % (n['id'], n['id'], 0), proxies=proxyDict)
             logger.info(r)
             data = html.fromstring(r.text)
             output = data.xpath('//h1[@class="resultsHeading"]/text()')
@@ -87,8 +87,8 @@ def getSainsStartUrl():
                                  .split('(')[1].split(' ')[0]
             for i in range(0, math.ceil(int(itemcount.replace(',', ''))/108)):
                 sains_start_url.append({"category":n['name'],"url":urlstring % (n['id'], n['id'], i*108)})
-                break
-            break
+                #break
+            #break
         logger.info(sains_start_url)
         return sains_start_url
 
@@ -131,6 +131,7 @@ def getProducts(urls):
                        'Lister"]/ul[contains(@class,"productLister")]' \
                        '//li[@class="gridItem"]'
     for url in urls:
+        time.sleep(10)
         r = requests.get(url['url'], proxies=proxyDict)
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
@@ -146,3 +147,7 @@ def getProducts(urls):
 if __name__ == '__main__':
     urls = getSainsStartUrl()
     items = getProducts(urls)
+    channel, connection = openConnection(exchangeName, queueName)
+    messageToFile(queueName, fileName=FILE_NAME)
+    connection.close()
+

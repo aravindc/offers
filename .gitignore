@@ -13,3 +13,4 @@ requirements.txt
 .idea
 *.pyc
 test*
+venv
