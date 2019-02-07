@@ -12,3 +12,4 @@ test.py
 requirements.txt
 .idea
 *.pyc
+test*
