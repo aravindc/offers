@@ -137,9 +137,9 @@ def getSkuList():
     response = requests.get(occado_urls['base_url'], proxies=proxyDict)
     json_obj = json.loads(response.text)
     logger.info(json_obj)
-    logger.info(len(json_obj['mainFopCollection']['sections'][0]['fops']))
+    logger.info(len(json_obj['mainFopCollection']['sections'][1]['fops']))
     sku_list = []
-    for obj in json_obj['mainFopCollection']['sections'][0]['fops']:
+    for obj in json_obj['mainFopCollection']['sections'][1]['fops']:
         sku_list.append(obj['sku'])
     return sku_list
 

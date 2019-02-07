@@ -28,6 +28,8 @@ proxyDict = {
 def proxyRequest(url, method, header, inputdata):
     time.sleep(5)
     logger.info('Connecting to {0}'.format(url))
+    resp = requests.get('https://api.ipify.org?format=json', proxies=proxyDict)
+    logger.info('Using ip: {0}'.format(resp.text))
     if method == 'post':
         return requests.post(url=url, proxies=proxyDict, headers=header, data=inputdata)
     elif method == 'get':
@@ -52,13 +54,13 @@ def getUser(session_token):
 def getItemCount(session_token):
     header_data = {"Authorization": "Bearer {0}".format(session_token)}
     response = proxyRequest(
-        'https://www.shopthefastlane.com/api/v2/store_products?limit=1&offset=0&sort=alpha&tags=has_coupon','get',header_data, None)
+        'https://www.shopthefastlane.com/api/v2/store_products?limit=1&offset=0&sort=alpha&tags=on_sale','get',header_data, None)
     logger.info(response.text)
     json_output = json.loads(response.text)
     return json_output['item_count']
 
 def getCrawlUrls(item_count):
-    url_string = 'https://www.shopthefastlane.com/api/v2/store_products?limit=60&offset={0}&sort=alpha&tags=has_coupon'
+    url_string = 'https://www.shopthefastlane.com/api/v2/store_products?limit=60&offset={0}&sort=alpha&tags=on_sale'
     urls = []
     for i in range(0, math.ceil(item_count/60)):
         urls.append(url_string.format(i*60))
