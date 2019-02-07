@@ -47,6 +47,7 @@ asda_urls = {
 
 all_urls = json.loads(json.dumps(asda_urls))
 
+
 # https://groceries.asda.com/special-offers/all-offers/by-category/103099
 # https://groceries.asda.com/cmscontent/json/pages/special-offers/all-offers/by-category?Endeca_user_segments=anonymous%7Cstore_4565%7Cwapp%7Cvp_XXL%7CZero_Order_Customers%7CDelivery_Pass_Older_Than_12_Months%7Cdp-false%7C1007%7C1019%7C1020%7C1023%7C1024%7C1027%7C1038%7C1041%7C1042%7C1043%7C1047%7C1053%7C1055%7C1057%7C1059%7C1067%7C1070%7C1082%7C1087%7C1097%7C1098%7C1099%7C1100%7C1102%7C1105%7C1107%7C1109%7C1110%7C1111%7C1112%7C1116%7C1117%7C1119%7C1123%7C1124%7C1126%7C1128%7C1130%7C1140%7C1141&storeId=4565&shipDate=1528074000000&N=103099&Nrpp=60&No=0&requestorigin=gi&_=1528125877201
 
@@ -93,7 +94,7 @@ def getCategories():
     return json_data
 
 
-def getItemIds(categories, channel):
+def getItemIds(categories):
     json_objs = json.loads(json.dumps(categories))
     allCat = []
     for json_obj in json_objs:
@@ -114,15 +115,16 @@ def getItemIds(categories, channel):
             #break
         allCat.append(itemIds)
         catItems.append(itemIds)
-        getItemDetails(catItems, channel)
+        getItemDetails(catItems)
         #break
     logger.debug(allCat)
     return allCat
 
 
-def getItemDetails(allCat, channel):
+def getItemDetails(allCat):
     regx = re.compile('[^a-zA-Z0-9 ]')
     totalItems = []
+    channel, connection = openConnection(exchangeName, queueName)
     for category in allCat:
         time.sleep(60)
         logger.debug(category['category'] + ': ' + str(len(category['sku_repoId'])))
@@ -166,6 +168,7 @@ def getItemDetails(allCat, channel):
                 sendMessage(exchangeName, queueName, tmpItem, channel)
                 totalItems.append(tmpItem)
     #logger.debug(totalItems)
+    connection.close()
     return totalItems
 
 
@@ -178,9 +181,9 @@ def genOutputFile(offerProducts):
         json.dump(offerProducts, outfile, ensure_ascii=False)
 
 if __name__ == '__main__':
-    channel, connection = openConnection(exchangeName, queueName)
+    #channel, connection = openConnection(exchangeName, queueName)
     categories = getCategories()
-    itemIds = getItemIds(categories, channel)
+    itemIds = getItemIds(categories)
     #offerProducts = getItemDetails(itemIds, channel)
     messageToFile(queueName, fileName=FILE_NAME)
-    connection.close()
+    #connection.close()
