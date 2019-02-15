@@ -5,7 +5,6 @@ import lxml.html
 import math
 import time
 from datetime import datetime
-from conxn import Conxn
 from messageq import openConnection
 from messageq import sendMessage
 from messageq import messageToFile
@@ -108,3 +107,6 @@ def getOffers(Urls):
 if __name__ == '__main__':
     urls = getTescoStartUrl()
     getOffers(urls)
+    channel, connection = openConnection(exchangeName, queueName)
+    messageToFile(queueName, fileName=FILE_NAME)
+    connection.close()    

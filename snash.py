@@ -6,6 +6,7 @@ import logging
 from datetime import datetime
 from messageq import openConnection
 from messageq import sendMessage
+from conxn import Conxn
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -16,45 +17,28 @@ queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 us_body = json.dumps({"binary": "web-ecom", "binary_version": "2.11.27-hotfix", "is_retina": "false",
                       "os_version": "Win32", "pixel_density": "1.0", "push_token": "", "screen_height": 1080, "screen_width": 1920})
 
-http_proxy = "http://localhost:8123"
-https_proxy = "https://localhost:8123"
+c = Conxn()
 
-proxyDict = {
-    "http": http_proxy,
-    "https": https_proxy,
-}
-
-
-def proxyRequest(url, method, header, inputdata):
-    time.sleep(5)
-    logger.info('Connecting to {0}'.format(url))
-    resp = requests.get('https://api.ipify.org?format=json', proxies=proxyDict)
-    logger.info('Using ip: {0}'.format(resp.text))
-    if method == 'post':
-        return requests.post(url=url, proxies=proxyDict, headers=header, data=inputdata)
-    elif method == 'get':
-        return requests.get(url=url, proxies=proxyDict, headers=header, data=inputdata)
-    # return requests.get(url)
 
 def getSessionToken():
     header_data = {"Content-type": "application/json"}
-    response = proxyRequest( 
-        'https://www.shopthefastlane.com/api/v2/user_sessions', 'post',header_data, us_body)
+    response = c.postUrlContent( 
+        'https://www.shopthefastlane.com/api/v2/user_sessions', header_data, us_body)
     json_output = json.loads(response.text)
     print(json_output)
     return json_output['session_token']
 
 def getUser(session_token):
     header_data = {"Authorization": "Bearer {0}".format(session_token)}
-    response = proxyRequest('https://www.shopthefastlane.com/api/v2/users', 'post', header_data, None)
+    response = c.postUrlContent('https://www.shopthefastlane.com/api/v2/users', header_data, None)
     logger.info(response.text)
     json_output = json.loads(response.text)
     return json_output['session_token']
 
 def getItemCount(session_token):
     header_data = {"Authorization": "Bearer {0}".format(session_token)}
-    response = proxyRequest(
-        'https://www.shopthefastlane.com/api/v2/store_products?limit=1&offset=0&sort=alpha&tags=on_sale','get',header_data, None)
+    response = c.getUrlContent(url = 
+        'https://www.shopthefastlane.com/api/v2/store_products?limit=1&offset=0&sort=alpha&tags=on_sale', header=header_data)
     logger.info(response.text)
     json_output = json.loads(response.text)
     return json_output['item_count']
@@ -69,7 +53,7 @@ def getCrawlUrls(item_count):
 def getPromoProducts(session_token, urls):
     header_data = {"Authorization": "Bearer {0}".format(session_token)}
     for snash_url in urls:
-        response = proxyRequest(snash_url, 'get', header_data, None)
+        response = c.getUrlContent(url=snash_url, header=header_data)
         json_output = json.loads(response.text)
         for item in json_output['items']:
             sendMessage(exchangeName, queueName, item, channel)

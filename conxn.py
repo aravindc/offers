@@ -30,10 +30,11 @@ class Conxn(object):
         except stem.ControllerError as err:
             print("Issue with reset - {0}".format(err))
     
-    def getUrlContent(self, Url):
+    def getUrlContent(self, url, header=None, inputData=None):
         r = None
+        logger.info(header)
         for i in range(0, 50):
-            r = requests.get(Url, proxies=self.proxyDict)
+            r = requests.get(url, proxies=self.proxyDict, headers=header, data=inputData)
             logger.info(r)
             if r.status_code != 200 and r.status_code != 302:
                 time.sleep(5)
@@ -42,3 +43,7 @@ class Conxn(object):
                 break
         print(r.text)
         return r
+    
+    def postUrlContent(self, url, header=None, inputData=None):
+        logger.info(header)
+        return requests.post(url, proxies=self.proxyDict, headers=header, data=inputData)
