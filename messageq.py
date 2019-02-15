@@ -41,6 +41,9 @@ def messageToFile(queueName, fileName):
         m, h, b = channel.basic_get(queueName)
         jsonOutput.append(json.loads(b.decode('utf8')))
         #channel.basic_ack(m.delivery_tag)
+        print(i)
+        print(m)
+        print(h)
     try:
         os.remove(fileName)
     except OSError:

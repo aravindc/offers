@@ -9,6 +9,7 @@ from messageq import sendMessage
 from messageq import messageToFile
 from lxml import html
 from urllib.parse import urlsplit, parse_qs
+from conxn import Conxn
 
 # Listed all product categories
 # 410380 - Special Offers
@@ -39,13 +40,15 @@ FILE_NAME = '/opt/offers/SAINS_' + datetime.now().strftime("%Y%m%d") + '.json'
 exchangeName = 'SAINS'
 queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 
-http_proxy = "http://localhost:8118"
-https_proxy = "https://localhost:8118"
+# http_proxy = "http://localhost:8118"
+# https_proxy = "https://localhost:8118"
 
-proxyDict = {
-    "http": http_proxy,
-    "https": https_proxy,
-}
+# proxyDict = {
+#     "http": http_proxy,
+#     "https": https_proxy,
+# }
+
+c = Conxn()
 
 categories = [
     {"id": 410380, "name": "Special Offers"},
@@ -65,32 +68,26 @@ categories = [
     {"id": 12298, "name": "Pet"}
 ]
 
-def getCurrentIp():
-    r = requests.get('https://api.ipify.org?format=json', proxies=proxyDict)
-    logger.info('Using Ip: {0}'.format(r.text))
-
 def getSainsStartUrl():
-        sains_start_url = []
-        urlstring = 'https://www.sainsburys.co.uk/shop/gb/groceries/home/' \
-                    'CategorySeeAllView?langId=44&storeId=10151&catalogId=' \
-                    '10123&pageSize=108&facet=88&categoryId=%d&' \
-                    'categoryFacetId1=%d&beginIndex=%d'
-        for n in categories:
-            logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
-            getCurrentIp()
-            r = requests.get(urlstring % (n['id'], n['id'], 0), proxies=proxyDict)
-            logger.info(r)
-            data = html.fromstring(r.text)
-            output = data.xpath('//h1[@class="resultsHeading"]/text()')
-            itemcount = output[0].replace('  ', '') \
-                                 .replace('\r\n', '') \
-                                 .split('(')[1].split(' ')[0]
-            for i in range(0, math.ceil(int(itemcount.replace(',', ''))/108)):
-                sains_start_url.append({"category":n['name'],"url":urlstring % (n['id'], n['id'], i*108)})
-                #break
+    sains_start_url = []
+    urlstring = 'https://www.sainsburys.co.uk/shop/gb/groceries/home/' \
+                'CategorySeeAllView?langId=44&storeId=10151&catalogId=' \
+                '10123&pageSize=108&facet=88&categoryId=%d&' \
+                'categoryFacetId1=%d&beginIndex=%d'
+    for n in categories:
+        logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
+        r = c.getUrlContent(urlstring % (n['id'], n['id'], 0))
+        data = html.fromstring(r.text)
+        output = data.xpath('//h1[@class="resultsHeading"]/text()')
+        itemcount = output[0].replace('  ', '') \
+                                .replace('\r\n', '') \
+                                .split('(')[1].split(' ')[0]
+        for i in range(0, math.ceil(int(itemcount.replace(',', ''))/108)):
+            sains_start_url.append({"category":n['name'],"url":urlstring % (n['id'], n['id'], i*108)})
             #break
-        logger.info(sains_start_url)
-        return sains_start_url
+        #break
+    logger.info(sains_start_url)
+    return sains_start_url
 
 def getProduct(offertag, category):
     offer = {}
@@ -132,7 +129,7 @@ def getProducts(urls):
                        '//li[@class="gridItem"]'
     for url in urls:
         time.sleep(10)
-        r = requests.get(url['url'], proxies=proxyDict)
+        r = c.getUrlContent(url['url'])        
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
         for product in products:
@@ -146,8 +143,7 @@ def getProducts(urls):
 
 if __name__ == '__main__':
     urls = getSainsStartUrl()
-    items = getProducts(urls)
+    getProducts(urls)
     channel, connection = openConnection(exchangeName, queueName)
     messageToFile(queueName, fileName=FILE_NAME)
     connection.close()
-
