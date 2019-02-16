@@ -23,8 +23,8 @@ FILE_NAME = '/opt/offers/MORRI_' + datetime.now().strftime("%Y%m%d") + '.json'
 exchangeName = 'MORRI'
 queueName = '{0}_{1}'.format(exchangeName,datetime.now().strftime("%Y%m%d"))
 
-http_proxy = "http://localhost:8123"
-https_proxy = "https://localhost:8123"
+http_proxy = "http://localhost:8118"
+https_proxy = "https://localhost:8118"
 
 proxyDict = {
     "http": http_proxy,
@@ -136,11 +136,13 @@ def getOffers(skuUrls, channel):
 def getSkuList():
     response = requests.get(occado_urls['base_url'], proxies=proxyDict)
     json_obj = json.loads(response.text)
-    logger.info(json_obj)
-    logger.info(len(json_obj['mainFopCollection']['sections'][1]['fops']))
+    logger.debug(json_obj)
+    sections = json_obj['mainFopCollection']['sections']
     sku_list = []
-    for obj in json_obj['mainFopCollection']['sections'][1]['fops']:
-        sku_list.append(obj['sku'])
+    for section in sections:
+        for obj in section['fops']:
+            logger.debug(obj)
+            sku_list.append(obj['sku'])
     return sku_list
 
 
