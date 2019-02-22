@@ -28,6 +28,9 @@ def sendMessage(exchangeName, queueName, jsonData, channel):
                               headers={'x-deduplication-header': header},
                               ))
 
+def deleteQueue(queueName, channel):
+    channel.queue_delete(queue = queueName)
+
 
 def messageToFile(queueName, fileName):
     print("Starting to Read Messages")

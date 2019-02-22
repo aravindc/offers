@@ -14,6 +14,7 @@ class Conxn(object):
 
     def getIp(self):
         r = requests.get('https://api.ipify.org?format=json', proxies=self.proxyDict)
+        logger.info(r.text)
         return r.text
 
     def resetConxn(self):
@@ -21,14 +22,14 @@ class Conxn(object):
             controller = Controller.from_port()
             controller.authenticate()
         except stem.SocketError as exc:
-            print("Unable to connect to tor on port 9051: {0}".format(exc))
+            logger.info("Unable to connect to tor on port 9051: {0}".format(exc))
             sys.exit(1)
         try:
-            print("Current IP: {0}".format(self.getIp()))
+            logger.info("Current IP: {0}".format(self.getIp()))
             controller.signal(Signal.NEWNYM)
-            print("IP Reset to: {0}".format(self.getIp()))
+            logger.info("IP Reset to: {0}".format(self.getIp()))
         except stem.ControllerError as err:
-            print("Issue with reset - {0}".format(err))
+            logger.info("Issue with reset - {0}".format(err))
     
     def getUrlContent(self, url, header=None, inputData=None):
         r = None
@@ -40,8 +41,9 @@ class Conxn(object):
                 time.sleep(5)
                 self.resetConxn()
             else:
+                self.getIp()
                 break
-        print(r.text)
+        logger.debug(r.text)
         return r
     
     def postUrlContent(self, url, header=None, inputData=None):
