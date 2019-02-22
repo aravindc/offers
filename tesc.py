@@ -41,7 +41,8 @@ class TescoOfferSpider(scrapy.Spider):
         else:
             itemcount = output[3].split(' ')
             #itemcount = output[0].split(' ')
-        print(math.ceil(int(itemcount[0]) / 24))
+        print(itemcount)
+        print(math.ceil(int(itemcount[0]) / 48))
         #    return math.ceil(int(itemcount[0])/24)
         # maxpage = math.ceil(int(itemcount[0]) / 24)
         maxpage = math.ceil(int(itemcount[0]) / 48)
