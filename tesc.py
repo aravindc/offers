@@ -30,16 +30,17 @@ class TescoOfferSpider(scrapy.Spider):
             'https://www.tesco.com/groceries/en-GB/promotions/alloffers')
         data = lxml.html.fromstring(r.text)
         # changed class name from "items-count__filter-caption" to "items-count__container"
+        # changed class name back to items-count__filter-caption
         output = data.xpath(
-            '//div[@class="items-count__container"]//text()')
+            '//div[@class="items-count__filter-caption"]//text()')
         print(output)
         if (len(output) == 0):
             output = data.xpath(
                 '//span[@class="items-count__filter-caption"]/text()')
             itemcount = output[0].split(' ')
         else:
-            # itemcount = output[3].split(' ')
-            itemcount = output[0].split(' ')
+            itemcount = output[3].split(' ')
+            #itemcount = output[0].split(' ')
         print(math.ceil(int(itemcount[0]) / 24))
         #    return math.ceil(int(itemcount[0])/24)
         maxpage = math.ceil(int(itemcount[0]) / 24)

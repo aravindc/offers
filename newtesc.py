@@ -29,21 +29,20 @@ def getTescoStartUrl():
     ##r = c.getUrlContent(
     ##    'https://www.tesco.com/groceries/en-GB/promotions/alloffers')
     r = requests.get('https://www.tesco.com/groceries/en-GB/promotions/alloffers')
+    logger.debug(r.text)
     data = lxml.html.fromstring(r.text)
     # changed class name from "items-count__filter-caption" to "items-count__container"
     output = data.xpath(
-        '//div[@class="items-count__container"]//text()')
-    print(output)
+        '//div[@class="items-count__filter-caption"]//text()')
+    logger.info(output)
     if (len(output) == 0):
         output = data.xpath(
             '//span[@class="items-count__filter-caption"]/text()')
         itemcount = output[0].split(' ')
     else:
-        # itemcount = output[3].split(' ')
-        itemcount = output[0].split(' ')
+        itemcount = output[3].split(' ')
+        # itemcount = output[0].split(' ')
     logger.info(math.ceil(int(itemcount[0]) / 48))
-    #    return math.ceil(int(itemcount[0])/24)
-    #maxpage = math.ceil(int(itemcount[0]) / 24)
     # Changed item count size from 24 to 48
     maxpage = math.ceil(int(itemcount[0]) / 48)
     tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?count=48&page={0}'
