@@ -43,8 +43,9 @@ class TescoOfferSpider(scrapy.Spider):
             #itemcount = output[0].split(' ')
         print(math.ceil(int(itemcount[0]) / 24))
         #    return math.ceil(int(itemcount[0])/24)
-        maxpage = math.ceil(int(itemcount[0]) / 24)
-        tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?page=%d'
+        # maxpage = math.ceil(int(itemcount[0]) / 24)
+        maxpage = math.ceil(int(itemcount[0]) / 48)
+        tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?count=48&page=%d'
         for i in range(1, maxpage):
             tesco_start_url.append(tescourl % i)
         return tesco_start_url
