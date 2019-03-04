@@ -76,7 +76,8 @@ def getSainsStartUrl():
                 'categoryFacetId1=%d&beginIndex=%d'
     for n in categories:
         logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
-        r = c.getUrlContent(url = urlstring % (n['id'], n['id'], 0))
+        #r = c.getUrlContent(url = urlstring % (n['id'], n['id'], 0))
+        r = requests.get(url = urlstring % (n['id'], n['id'], 0))
         data = html.fromstring(r.text)
         output = data.xpath('//h1[@class="resultsHeading"]/text()')
         itemcount = output[0].replace('  ', '') \
@@ -129,7 +130,8 @@ def getProducts(urls):
                        '//li[@class="gridItem"]'
     for url in urls:
         time.sleep(10)
-        r = c.getUrlContent(url = url['url'])        
+        #r = c.getUrlContent(url = url['url'])
+        r = requests.get(url = url['url'])
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
         for product in products:
