@@ -100,9 +100,12 @@ def getProduct(offertag, category):
     product_imgsrc_tag = './/div[@class="productInfo"]//h3/a/img/@src'
     price_unit_tag = './/div[@class="pricing"]/p[@class="pricePerUnit"]' \
         '/text()[1]'
-    offer['productid'] = parse_qs(urlsplit(offertag
+    try:
+        offer['productid'] = parse_qs(urlsplit(offertag
                                            .xpath(product_id_tag)[0])
                                   .query)['productId'][0]
+    except:
+        print(offertag.xpath(product_id_tag))
     offer['imgsrcl'] = offertag.xpath(product_imgsrc_tag)[0]
     offer['productdesc'] = offertag.xpath(product_desc_tag) \
         [0].replace('  ', '') \
