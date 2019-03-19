@@ -1,5 +1,6 @@
 from stem.control import *
 from stem import Signal
+from fake_useragent import UserAgent
 import requests
 import logging
 
@@ -11,6 +12,7 @@ class Conxn(object):
         self.http_proxy = "http://localhost:8118"
         self.https_proxy = "https://localhost:8118"
         self.proxyDict = {"http": self.http_proxy, "https": self.https_proxy,}
+        self.ua = UserAgent()
 
     def getIp(self):
         r = requests.get('https://api.ipify.org?format=json', proxies=self.proxyDict)
@@ -33,6 +35,8 @@ class Conxn(object):
     
     def getUrlContent(self, url, header=None, inputData=None):
         r = None
+        if header == None:
+            header = {'User-Agent':str(self.ua.chrome)}
         logger.info(header)
         for i in range(0, 50):
             r = requests.get(url, proxies=self.proxyDict, headers=header, data=inputData)
