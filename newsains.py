@@ -49,13 +49,13 @@ queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 # }
 
 c = Conxn()
-
+# Changed Dairy, eggs & chilled
+# 428374
 categories = [
     {"id": 410380, "name": "Special Offers"},
     {"id": 12518, "name": "Fruit & vegetables"},
     {"id": 13343, "name": "Meat & fish"},
-    {"id": 387873, "name": "Dairy, eggs & juice"},
-    {"id": 267397, "name": "Chilled"},
+    {"id": 428374, "name": "Dairy, eggs & juice"},
     {"id": 12320, "name": "Bakery"},
     {"id": 218831, "name": "Frozen"},
     {"id": 12422, "name": "Food cupboard"},
@@ -65,14 +65,15 @@ categories = [
     {"id": 12448, "name": "Health & beauty"},
     {"id": 11651, "name": "Baby & toddler"},
     {"id": 12564, "name": "Household"},
-    {"id": 12298, "name": "Pet"}
+    {"id": 12298, "name": "Pet"},
+    {"id": 281806, "name": "Homeware & garden"}
 ]
 
 def getSainsStartUrl():
     sains_start_url = []
     urlstring = 'https://www.sainsburys.co.uk/shop/gb/groceries/home/' \
                 'CategorySeeAllView?langId=44&storeId=10151&catalogId=' \
-                '10123&pageSize=108&facet=88&categoryId=%d&' \
+                '10123&pageSize=120&facet=88&categoryId=%d&' \
                 'categoryFacetId1=%d&beginIndex=%d'
     for n in categories:
         logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
@@ -80,6 +81,7 @@ def getSainsStartUrl():
         r = requests.get(url = urlstring % (n['id'], n['id'], 0))
         data = html.fromstring(r.text)
         output = data.xpath('//h1[@class="resultsHeading"]/text()')
+        print(output)
         itemcount = output[0].replace('  ', '') \
                                 .replace('\r\n', '') \
                                 .split('(')[1].split(' ')[0]
