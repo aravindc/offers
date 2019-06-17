@@ -8,7 +8,7 @@ from messageq import openConnection
 from messageq import sendMessage
 from messageq import messageToFile
 from lxml import html
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import urlparse, urlsplit, parse_qs
 from conxn import Conxn
 
 # Listed all product categories
@@ -51,25 +51,51 @@ queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 c = Conxn()
 # Changed Dairy, eggs & chilled
 # 428374
-categories = [
-    {"id": 410380, "name": "Special Offers"},
-    {"id": 12518, "name": "Fruit & vegetables"},
-    {"id": 13343, "name": "Meat & fish"},
-    {"id": 428374, "name": "Dairy, eggs & juice"},
-    {"id": 12320, "name": "Bakery"},
-    {"id": 218831, "name": "Frozen"},
-    {"id": 12422, "name": "Food cupboard"},
-    {"id": 340854, "name": "Beer, wine & spirits"},
-    {"id": 281806, "name": "Home & outdoor"},
-    {"id": 12192, "name": "Drinks"},
-    {"id": 12448, "name": "Health & beauty"},
-    {"id": 11651, "name": "Baby & toddler"},
-    {"id": 12564, "name": "Household"},
-    {"id": 12298, "name": "Pet"},
-    {"id": 281806, "name": "Homeware & garden"}
-]
+# Changed hard-coded category to be generated through genCategoryArray function
+# categories = [
+#     {"id": 410380, "name": "Special Offers"},
+#     {"id": 12518, "name": "Fruit & vegetables"},
+#     {"id": 13343, "name": "Meat & fish"},
+#     {"id": 428374, "name": "Dairy, eggs & juice"},
+#     {"id": 12320, "name": "Bakery"},
+#     {"id": 218831, "name": "Frozen"},
+#     {"id": 12422, "name": "Food cupboard"},
+#     {"id": 340854, "name": "Beer, wine & spirits"},
+#     {"id": 281806, "name": "Home & outdoor"},
+#     {"id": 12192, "name": "Drinks"},
+#     {"id": 12448, "name": "Health & beauty"},
+#     {"id": 11651, "name": "Baby & toddler"},
+#     {"id": 12564, "name": "Household"},
+#     {"id": 12298, "name": "Pet"},
+#     {"id": 281806, "name": "Homeware & garden"}
+# ]
 
-def getSainsStartUrl():
+
+def genCategoryArray():
+    grocery_html = requests.get(
+        url='https://www.sainsburys.co.uk/shop/gb/groceries')
+    grocery_sub_nav_links = '//div[@class="subNav jsHide"]/ul/li/a/@href'
+    data = html.fromstring(grocery_html.text)
+    category_links = data.xpath(grocery_sub_nav_links)
+    category_array = []
+    for category_link in category_links:
+        catJson = {}
+        r = requests.get(category_link)
+        catData = html.fromstring(r.text)
+        catOffLink = catData.xpath('//li/a[contains(text(),"offer")]/@href')
+        r1 = requests.get(catOffLink[0])
+        linkData = html.fromstring(r1.text)
+        linkOffLink = linkData.xpath(
+            '//div[@class="filterCollapseBar"]/div/a[@class="repressive"]/@href')
+        categoryId = parse_qs(urlparse(linkOffLink[0]).query)[
+            'top_category'][0]
+        categoryName = urlparse(category_link).path.split('/')[4]
+        catJson['id'] = categoryId
+        catJson['name'] = categoryName
+        category_array.append(catJson)
+    return category_array
+
+def getSainsStartUrl(categories):
     sains_start_url = []
     urlstring = 'https://www.sainsburys.co.uk/shop/gb/groceries/home/' \
                 'CategorySeeAllView?langId=44&storeId=10151&catalogId=' \
@@ -149,7 +175,8 @@ def getProducts(urls):
 
 
 if __name__ == '__main__':
-    urls = getSainsStartUrl()
+    categories = genCategoryArray()
+    urls = getSainsStartUrl(categories)
     getProducts(urls)
     channel, connection = openConnection(exchangeName, queueName)
     messageToFile(queueName, fileName=FILE_NAME)
