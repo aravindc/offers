@@ -23,36 +23,73 @@ exchangeName = 'TESC'
 queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 
 #c = Conxn()
+# Removed getTescoStartUrl and replaced with genCategoryUrlArray
+# This function provides starturl along with its category
+# def getTescoStartUrl():
+#     tesco_start_url = []
+#     ##r = c.getUrlContent(
+#     ##    'https://www.tesco.com/groceries/en-GB/promotions/alloffers')
+#     r = requests.get('https://www.tesco.com/groceries/en-GB/promotions/alloffers')
+#     logger.debug(r.text)
+#     data = lxml.html.fromstring(r.text)
+#     # changed class name from "items-count__filter-caption" to "items-count__container"
+#     output = data.xpath(
+#         '//div[@class="items-count__filter-caption"]//text()')
+#     logger.info(output)
+#     if (len(output) == 0):
+#         output = data.xpath(
+#             '//span[@class="items-count__filter-caption"]/text()')
+#         itemcount = output[0].split(' ')
+#     else:
+#         itemcount = output[3].split(' ')
+#         # itemcount = output[0].split(' ')
+#     logger.info(math.ceil(int(itemcount[0]) / 48))
+#     # Changed item count size from 24 to 48
+#     maxpage = math.ceil(int(itemcount[0]) / 48)
+#     tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?count=48&page={0}'
+#     for i in range(1, maxpage):
+#         tesco_start_url.append(tescourl.format(i))
+#         logger.info(tesco_start_url)
+#         break
+#     return tesco_start_url
 
-def getTescoStartUrl():
+
+def genCategoryUrlArray():
     tesco_start_url = []
-    ##r = c.getUrlContent(
-    ##    'https://www.tesco.com/groceries/en-GB/promotions/alloffers')
-    r = requests.get('https://www.tesco.com/groceries/en-GB/promotions/alloffers')
-    logger.debug(r.text)
-    data = lxml.html.fromstring(r.text)
-    # changed class name from "items-count__filter-caption" to "items-count__container"
-    output = data.xpath(
-        '//div[@class="items-count__filter-caption"]//text()')
-    logger.info(output)
-    if (len(output) == 0):
+    base_url = 'https://www.tesco.com'
+    tesc_cat_format_url = '/all?viewAll=promotion&promotion=offers&count=48&page={0}'
+    grocery_html = requests.get(
+        url='https://www.tesco.com/groceries/en-GB/shop/')
+    grocery_sub_nav_links = '//div[@class="current"]/ul[@class="list"]/li/a/@href'
+    grocery_html_data = html.fromstring(grocery_html.text)
+    category_links = grocery_html_data.xpath(grocery_sub_nav_links)
+    for category_link in category_links:
+        transform_url = category_link.replace('?include-children=true', '')
+        category = transform_url.split('/')[4]
+        cat_link = transform_url + format(tesc_cat_format_url, '1')
+        r = requests.get(base_url+cat_link)
+        data = html.fromstring(r.text)
         output = data.xpath(
-            '//span[@class="items-count__filter-caption"]/text()')
-        itemcount = output[0].split(' ')
-    else:
-        itemcount = output[3].split(' ')
-        # itemcount = output[0].split(' ')
-    logger.info(math.ceil(int(itemcount[0]) / 48))
-    # Changed item count size from 24 to 48
-    maxpage = math.ceil(int(itemcount[0]) / 48)
-    tescourl = 'https://www.tesco.com/groceries/en-GB/promotions/alloffers?count=48&page={0}'
-    for i in range(1, maxpage):
-        tesco_start_url.append(tescourl.format(i))
-        logger.info(tesco_start_url)
-        break
+            '//div[@class="items-count__filter-caption"]//text()')
+        try:
+            if (len(output) == 0):
+                output = data.xpath(
+                    '//span[@class="items-count__filter-caption"]/text()')
+                itemcount = output[0].split(' ')
+            else:
+                itemcount = output[3].split(' ')
+            maxpage = math.ceil(int(itemcount[0]) / 48)
+            for i in range(1, maxpage+1):
+                jsonObj = {}
+                jsonObj['category'] = category
+                jsonObj['category_offer_url'] = base_url + \
+                    transform_url + tesc_cat_format_url.format(i)
+                tesco_start_url.append(jsonObj)
+        except:
+            pass
     return tesco_start_url
 
-def getProduct(Offertag):
+def getProduct(Offertag, Category):
     offer = {}
     # XPath Tags
     
@@ -63,6 +100,7 @@ def getProduct(Offertag):
     validity_desc_tag = './/li[@class="product-promotion"]//span[@class="dates"]/text()'
 
     offer['productid'] = Offertag.xpath(product_id_tag)[0].replace("/groceries/en-GB/products/", "")
+    offer['category'] = Category
     if Offertag.xpath(product_imgsrc_tag):
         offer['imgsrc225'] = Offertag.xpath(product_imgsrc_tag)[0]
         offer['imgsrc110'] = Offertag.xpath(product_imgsrc_tag)[0].replace('225x225', '110x110')
@@ -92,19 +130,19 @@ def getOffers(Urls):
     product_grid = '//div[@class="product-lists"]//ul[@class="product-list grid"]/li'
     for url in Urls:
         time.sleep(10)
-        r = requests.get(url)
+        r = requests.get(url['category_offer_url'])
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
         for product in products:
-            sendMessage(exchangeName, queueName, getProduct(product), channel)
-            logger.info(getProduct(product))
+            sendMessage(exchangeName, queueName, getProduct(product,url['category']), channel)
+            logger.info(getProduct(product, url['category']))
             #break
         #break
     connection.close()
     return None
 
 if __name__ == '__main__':
-    urls = getTescoStartUrl()
+    urls = genCategoryUrlArray()
     getOffers(urls)
     channel, connection = openConnection(exchangeName, queueName)
     messageToFile(queueName, fileName=FILE_NAME)
