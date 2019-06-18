@@ -93,18 +93,20 @@ def genCategoryArray():
         catJson['id'] = categoryId
         catJson['name'] = categoryName
         category_array.append(catJson)
+        #break
     return category_array
 
 def getSainsStartUrl(categories):
     sains_start_url = []
     urlstring = 'https://www.sainsburys.co.uk/shop/gb/groceries/home/' \
                 'CategorySeeAllView?langId=44&storeId=10151&catalogId=' \
-                '10123&pageSize=120&facet=88&categoryId=%d&' \
-                'categoryFacetId1=%d&beginIndex=%d'
+                '10123&pageSize=120&facet=88&categoryId={0}&' \
+                'categoryFacetId1={1}&beginIndex={2}'
     for n in categories:
-        logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
+        #logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
+        logger.info("Working on {0}".format(urlstring.format(n['id'],n['id'],0)))
         #r = c.getUrlContent(url = urlstring % (n['id'], n['id'], 0))
-        r = requests.get(url = urlstring % (n['id'], n['id'], 0))
+        r = requests.get(url=urlstring.format(n['id'], n['id'], 0))
         data = html.fromstring(r.text)
         output = data.xpath('//h1[@class="resultsHeading"]/text()')
         print(output)
@@ -112,7 +114,8 @@ def getSainsStartUrl(categories):
                                 .replace('\r\n', '') \
                                 .split('(')[1].split(' ')[0]
         for i in range(0, math.ceil(int(itemcount.replace(',', ''))/108)):
-            sains_start_url.append({"category":n['name'],"url":urlstring % (n['id'], n['id'], i*108)})
+            sains_start_url.append(
+                {"category": n['name'], "url": urlstring.format(n['id'], n['id'], i*108)})
             #break
         #break
     logger.info(sains_start_url)
