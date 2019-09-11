@@ -79,10 +79,14 @@ def genCategoryArray():
     category_links = data.xpath(grocery_sub_nav_links)
     category_array = []
     for category_link in category_links:
+        print(category_link)
         catJson = {}
         r = requests.get(category_link)
         catData = html.fromstring(r.text)
         catOffLink = catData.xpath('//li/a[contains(text(),"offer")]/@href')
+        if len(catOffLink) <= 1:
+            continue 
+        print(len(catOffLink))
         r1 = requests.get(catOffLink[0])
         linkData = html.fromstring(r1.text)
         linkOffLink = linkData.xpath(
@@ -92,6 +96,7 @@ def genCategoryArray():
         categoryName = urlparse(category_link).path.split('/')[4]
         catJson['id'] = categoryId
         catJson['name'] = categoryName
+        print(catJson)
         category_array.append(catJson)
         #break
     return category_array

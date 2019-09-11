@@ -145,5 +145,5 @@ if __name__ == '__main__':
     urls = genCategoryUrlArray()
     getOffers(urls)
     channel, connection = openConnection(exchangeName, queueName)
-    messageToFile(queueName, fileName=FILE_NAME)
+    #messageToFile(queueName, fileName=FILE_NAME)
     connection.close()    

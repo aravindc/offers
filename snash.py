@@ -6,12 +6,14 @@ import logging
 from datetime import datetime
 from messageq import openConnection
 from messageq import sendMessage
+from messageq import messageToFile
 from conxn import Conxn
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 items = []
+FILE_NAME = '/opt/offers/SNASH_' + datetime.now().strftime("%Y%m%d") + '.json'
 exchangeName = 'SNASH'
 queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 us_body = json.dumps({"binary": "web-ecom", "binary_version": "2.11.27-hotfix", "is_retina": "false",
@@ -67,4 +69,5 @@ if __name__ == "__main__":
     itemCount = getItemCount(s_token2)
     Urls = getCrawlUrls(itemCount)
     getPromoProducts(s_token2, Urls)
+    messageToFile(queueName, fileName=FILE_NAME)
     connection.close()

@@ -14,3 +14,4 @@ requirements.txt
 *.pyc
 test*
 venv
+stem01.py
