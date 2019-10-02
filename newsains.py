@@ -89,8 +89,10 @@ def genCategoryArray():
         print(len(catOffLink))
         r1 = requests.get(catOffLink[0])
         linkData = html.fromstring(r1.text)
+        print(linkData)
         linkOffLink = linkData.xpath(
             '//div[@class="filterCollapseBar"]/div/a[@class="repressive"]/@href')
+        print(linkOffLink)
         categoryId = parse_qs(urlparse(linkOffLink[0]).query)[
             'top_category'][0]
         categoryName = urlparse(category_link).path.split('/')[4]
