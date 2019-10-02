@@ -14,4 +14,8 @@ requirements.txt
 *.pyc
 test*
 venv
+<<<<<<< Updated upstream
 stem01.py
+=======
+tescData.txt
+>>>>>>> Stashed changes

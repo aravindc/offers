@@ -85,6 +85,7 @@ def genCategoryUrlArray():
                 jsonObj['category_offer_url'] = base_url + \
                     transform_url + tesc_cat_format_url.format(i)
                 tesco_start_url.append(jsonObj)
+                break
         except:
             pass
     return tesco_start_url
@@ -93,12 +94,25 @@ def getProduct(Offertag, Category):
     offer = {}
     # XPath Tags
     
-    product_id_tag = './/div[@class="product-tile-wrapper"]//div[@class="tile-content"]/a/@href'
-    product_imgsrc_tag = './/img/@src'
-    product_desc_tag = './/div[@class="product-details-wrapper"]//a/text()'
-    offer_desc_tag = './/li[@class="product-promotion"]//span[@class="offer-text"]/text()'
-    validity_desc_tag = './/li[@class="product-promotion"]//span[@class="dates"]/text()'
+    #product_list_base_tag = './/div[@class = "product-lists"]//ul[@class = "product-list grid"]/li[contains(@class, "product-list--list-item")]/div/div/div/div/div/div/'
+    #product_id_tag = './/div[@class="product-tile--wrapper"]//div[@class="tile-content"]/a/@href'
+    #product_imgsrc_tag = './/img/@src'
+    #product_desc_tag = './/div[@class="product-details--wrapper"]//a/text()'
+    #offer_desc_tag = './/div[@class = "product-lists"]//ul[@class = "product-list grid"]/li[contains(@class, "product-list--list-item")]/div/div/div/div/div/div//div/span[@class = "offer-text"]/text()'
+    #validity_desc_tag = './/div[@class = "product-lists"]//ul[@class = "product-list grid"]/li[contains(@class, "product-list--list-item")]/div/div/div/div/div/div//div/span[@class = "dates"]/text()'
 
+    product_list_base_tag = './div/div/div/div/'
+    product_id_tag = product_list_base_tag + \
+        '/div[@class="tile-content"]/a/@href'
+    product_imgsrc_tag = product_list_base_tag +'/img/@src'
+    product_desc_tag = product_list_base_tag + '/h3/a/text()'
+    offer_desc_tag = product_list_base_tag + \
+        '/div/span[@class = "offer-text"]/text()'
+    validity_desc_tag = product_list_base_tag + \
+        '/div/span[@class = "dates"]/text()'
+
+    logger.info(product_id_tag)
+    logger.info(Offertag.xpath(product_id_tag))
     offer['productid'] = Offertag.xpath(product_id_tag)[0].replace("/groceries/en-GB/products/", "")
     offer['category'] = Category
     if Offertag.xpath(product_imgsrc_tag):
@@ -126,24 +140,31 @@ def getProduct(Offertag, Category):
     return offer
 
 def getOffers(Urls):
-    channel, connection = openConnection(exchangeName, queueName)
+    # channel, connection = openConnection(exchangeName, queueName)
     product_grid = '//div[@class="product-lists"]//ul[@class="product-list grid"]/li'
     for url in Urls:
-        time.sleep(10)
+        #time.sleep(10)
         r = requests.get(url['category_offer_url'])
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
         for product in products:
-            sendMessage(exchangeName, queueName, getProduct(product,url['category']), channel)
-            logger.info(getProduct(product, url['category']))
-            #break
-        #break
-    connection.close()
+            #sendMessage(exchangeName, queueName, getProduct(product,url['category']), channel)
+            logger.info(product)
+            #logger.info(getProduct(product, url['category']))
+            break
+        break
+    #connection.close()
     return None
 
 if __name__ == '__main__':
     urls = genCategoryUrlArray()
     getOffers(urls)
+<<<<<<< Updated upstream
     channel, connection = openConnection(exchangeName, queueName)
     #messageToFile(queueName, fileName=FILE_NAME)
     connection.close()    
+=======
+    #channel, connection = openConnection(exchangeName, queueName)
+    #messageToFile(queueName, fileName=FILE_NAME)
+    #connection.close()    
+>>>>>>> Stashed changes
