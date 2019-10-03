@@ -159,12 +159,6 @@ def getOffers(Urls):
 if __name__ == '__main__':
     urls = genCategoryUrlArray()
     getOffers(urls)
-<<<<<<< Updated upstream
     channel, connection = openConnection(exchangeName, queueName)
     #messageToFile(queueName, fileName=FILE_NAME)
     connection.close()    
-=======
-    #channel, connection = openConnection(exchangeName, queueName)
-    #messageToFile(queueName, fileName=FILE_NAME)
-    #connection.close()    
->>>>>>> Stashed changes
