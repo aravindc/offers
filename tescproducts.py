@@ -5,12 +5,24 @@ from fake_useragent import UserAgent
 import logging
 import time
 import uuid
+import math
 
+# Global variables
 ua = UserAgent()
 user_agent = str(ua.chrome)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+supercats = [
+    'fresh-food', 'bakery',
+    'frozen-food','food-cupboard',
+    'drinks', 'baby',
+    'health-and-beauty', 'pets',
+    'household', 'home-and-ents'
+    ]
+resourcesUrl = 'https://www.tesco.com/groceries/en-GB/resources'
 
+
+# Get CSRF Token
 def getCsrfToken(clientSession):
     URL = 'https://www.tesco.com/groceries/en-GB/shop/fresh-food/all'
     header_data = {'User-Agent': user_agent}
@@ -19,17 +31,42 @@ def getCsrfToken(clientSession):
     totalhtml = html.fromstring(response.text)
     return totalhtml.xpath('//body/@data-csrf-token')[0]
 
+# Generate Unique Hash using UUID
 def generateHash():
     return str(uuid.uuid4().int)[0:16]
 
+def getCategoryCount(clientSession, categoryName):
+    header_data = {'x-csrf-token': getCsrfToken(
+       clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}
+    post_data = generateBodyData(categoryName, 1)
+    response = clientSession.post(resourcesUrl, json=post_data, headers=header_data)
+    jsonObj = json.loads(response.text)
+    jsonProductCount = jsonObj['productsByCategory']['results']['pageInformation']['totalCount']
+    return jsonProductCount
+
+
 def getProducts(clientSession):
+    header_data = {'x-csrf-token': getCsrfToken(
+       clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}    
+    for supercat in supercats:
+        categoryCount = getCategoryCount(clientSession, supercat)
+        logger.info(categoryCount)
+        maxpage = math.ceil(int(categoryCount) / 48)
+        for i in range(1, maxpage):
+            bodyData = generateBodyData(supercat, i)
+            response = clientSession.post(resourcesUrl, json=bodyData, headers=header_data)
+            jsonObj = json.loads(response.text)
+            jsonProductItems = jsonObj['productsByCategory']['results']['productItems']
+            logger.info(jsonProductItems)
+            break
+        break
     return None
 
-
-def generateBodyData(categoryName):
+# Generate Body data based on categoryName
+def generateBodyData(categoryName, pageNum):
     post_data = {"resources":[{"type":"trolleyContents", "params":{},"hash":generateHash()},
     {"type":"productsByCategory",
-    "params":{"query":{"page":"1", "count": "48"},
+    "params":{"query":{"page": pageNum, "count": "48"},
     "superdepartment": categoryName},
     "hash":generateHash()}]}
     logger.debug(post_data)
@@ -37,35 +74,25 @@ def generateBodyData(categoryName):
 
 
 if __name__ == '__main__':
-    supercats = [
-        {'category':'fresh-food', 'catCount': 0},
-        {'category':'bakery', 'catCount': 0},
-        {'category':'frozen-food', 'catCount': 0},
-        {'category':'food-cupboard', 'catCount': 0},
-        {'category':'drinks', 'catCount': 0},
-        {'category':'baby', 'catCount': 0},
-        {'category':'health-and-beauty', 'catCount': 0},
-        {'category':'pets', 'catCount': 0},
-        {'category':'household', 'catCount': 0},
-        {'category':'home-and-ents', 'catCount': 0}
-        ]
     clientSession = requests.Session()
-    header_data = {'x-csrf-token': getCsrfToken(
-       clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}
-    logger.debug(header_data)
-    fin_url = 'https://www.tesco.com/groceries/en-GB/resources'
+    getProducts(clientSession)
 
-    totalCount = 0
+    # header_data = {'x-csrf-token': getCsrfToken(
+    #    clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}
+    # logger.debug(header_data)
+    
 
-    for supercat in supercats:
-        post_data = generateBodyData(supercat['category'])
-        response = clientSession.post(fin_url, json=post_data, headers=header_data)
-        jsonObj = json.loads(response.text)
-        jsonProductCount = jsonObj['productsByCategory']['results']['pageInformation']['totalCount']
-        jsonProductItems = jsonObj['productsByCategory']['results']['productItems']
-        logger.info('{0} - {1}'.format(supercat['category'], jsonProductCount))
-        totalCount = totalCount +  int(jsonProductCount)
-        time.sleep(5)
-        logger.debug(jsonProductItems)
-    logger.info("Total Items: {}".format(totalCount))
+    # totalCount = 0
+
+    # for supercat in supercats:
+    #     post_data = generateBodyData(supercat, 1)
+    #     response = clientSession.post(resourcesUrl, json=post_data, headers=header_data)
+    #     jsonObj = json.loads(response.text)
+    #     jsonProductCount = jsonObj['productsByCategory']['results']['pageInformation']['totalCount']
+    #     jsonProductItems = jsonObj['productsByCategory']['results']['productItems']
+    #     logger.info('{0} - {1}'.format(supercat, jsonProductCount))
+    #     totalCount = totalCount +  int(jsonProductCount)
+    #     time.sleep(5)
+    #     logger.debug(jsonProductItems)
+    # logger.info("Total Items: {}".format(totalCount))
 
