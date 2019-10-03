@@ -1,11 +1,17 @@
 import requests
 import json
-from lxml import html
-from fake_useragent import UserAgent
 import logging
 import time
 import uuid
 import math
+import hashlib
+from lxml import html
+from fake_useragent import UserAgent
+from datetime import datetime
+from messageq import openConnection
+from messageq import sendMessage
+from messageq import messageToFile
+
 
 # Global variables
 ua = UserAgent()
@@ -20,7 +26,8 @@ supercats = [
     'household', 'home-and-ents'
     ]
 resourcesUrl = 'https://www.tesco.com/groceries/en-GB/resources'
-
+exchangeName = 'TESCO_PROD_'
+queueName = '{0}_{1}'.format(exchangeName, datetime.now().strftime("%Y%m%d"))
 
 # Get CSRF Token
 def getCsrfToken(clientSession):
@@ -46,6 +53,7 @@ def getCategoryCount(clientSession, categoryName):
 
 
 def getProducts(clientSession):
+    productArray = []
     header_data = {'x-csrf-token': getCsrfToken(
        clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}    
     for supercat in supercats:
@@ -56,11 +64,15 @@ def getProducts(clientSession):
             bodyData = generateBodyData(supercat, i)
             response = clientSession.post(resourcesUrl, json=bodyData, headers=header_data)
             jsonObj = json.loads(response.text)
-            jsonProductItems = jsonObj['productsByCategory']['results']['productItems']
-            logger.info(jsonProductItems)
+            jsonProductArray = jsonObj['productsByCategory']['results']['productItems']
+            for jsonProductItem in jsonProductArray:
+                productArray.append(jsonProductItem)
+                sendMessage(exchangeName, queueName, jsonProductItem, channel)
+                logger.debug(jsonProductItem)
+            time.sleep(5)
             break
         break
-    return None
+    return productArray
 
 # Generate Body data based on categoryName
 def generateBodyData(categoryName, pageNum):
@@ -75,15 +87,14 @@ def generateBodyData(categoryName, pageNum):
 
 if __name__ == '__main__':
     clientSession = requests.Session()
+    channel, connection = openConnection(exchangeName, queueName)
     getProducts(clientSession)
+
 
     # header_data = {'x-csrf-token': getCsrfToken(
     #    clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}
     # logger.debug(header_data)
-    
-
     # totalCount = 0
-
     # for supercat in supercats:
     #     post_data = generateBodyData(supercat, 1)
     #     response = clientSession.post(resourcesUrl, json=post_data, headers=header_data)
