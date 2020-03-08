@@ -6,6 +6,6 @@ RUN apk update && apk upgrade && apk add bash
 
 WORKDIR /usr/src/offers
 
-COPY newtesc.py .
+COPY tescprod.py .
 
-ENTRYPOINT ["python","./app/newtesc.py"]
+ENTRYPOINT ["python","./app/tescprod.py"]

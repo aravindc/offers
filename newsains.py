@@ -78,6 +78,7 @@ def genCategoryArray():
     data = html.fromstring(grocery_html.text)
     category_links = data.xpath(grocery_sub_nav_links)
     category_array = []
+    sains_base_url = 'https://www.sainsburys.co.uk'
     for category_link in category_links:
         print(category_link)
         catJson = {}
@@ -87,7 +88,8 @@ def genCategoryArray():
         if len(catOffLink) <= 1:
             continue 
         print(len(catOffLink))
-        r1 = requests.get(catOffLink[0])
+        print(catOffLink[0] if catOffLink[0].startswith(sains_base_url) else sains_base_url+catOffLink[0])
+        r1 = requests.get(catOffLink[0] if catOffLink[0].startswith(sains_base_url) else sains_base_url+catOffLink[0])
         linkData = html.fromstring(r1.text)
         print(linkData)
         linkOffLink = linkData.xpath(
