@@ -86,7 +86,7 @@ def genCategoryArray():
         catData = html.fromstring(r.text)
         catOffLink = catData.xpath('//li/a[contains(text(),"offer")]/@href')
         if len(catOffLink) <= 1:
-            continue 
+            continue
         print(len(catOffLink))
         print(catOffLink[0] if catOffLink[0].startswith(sains_base_url) else sains_base_url+catOffLink[0])
         r1 = requests.get(catOffLink[0] if catOffLink[0].startswith(sains_base_url) else sains_base_url+catOffLink[0])
@@ -102,8 +102,9 @@ def genCategoryArray():
         catJson['name'] = categoryName
         print(catJson)
         category_array.append(catJson)
-        #break
+        # break
     return category_array
+
 
 def getSainsStartUrl(categories):
     sains_start_url = []
@@ -112,9 +113,9 @@ def getSainsStartUrl(categories):
                 '10123&pageSize=120&facet=88&categoryId={0}&' \
                 'categoryFacetId1={1}&beginIndex={2}'
     for n in categories:
-        #logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
+        # logger.info("Working on {0}".format(urlstring % (n['id'], n['id'], 0)))
         logger.info("Working on {0}".format(urlstring.format(n['id'],n['id'],0)))
-        #r = c.getUrlContent(url = urlstring % (n['id'], n['id'], 0))
+        # r = c.getUrlContent(url = urlstring % (n['id'], n['id'], 0))
         r = requests.get(url=urlstring.format(n['id'], n['id'], 0))
         data = html.fromstring(r.text)
         output = data.xpath('//h1[@class="resultsHeading"]/text()')
@@ -125,10 +126,11 @@ def getSainsStartUrl(categories):
         for i in range(0, math.ceil(int(itemcount.replace(',', ''))/108)):
             sains_start_url.append(
                 {"category": n['name'], "url": urlstring.format(n['id'], n['id'], i*108)})
-            #break
-        #break
+            # break
+        # break
     logger.info(sains_start_url)
     return sains_start_url
+
 
 def getProduct(offertag, category):
     offer = {}
@@ -161,10 +163,11 @@ def getProduct(offertag, category):
         .replace('  ', '') \
         .replace('\r\n', '') \
         .replace('\n', '') \
-        .replace('Â£','£')
+        .replace('Â£', '£')
     offer['category'] = category
     logger.info(offer)
     return offer
+
 
 def getProducts(urls):
     channel, connection = openConnection(exchangeName, queueName)
@@ -173,15 +176,15 @@ def getProducts(urls):
                        '//li[@class="gridItem"]'
     for url in urls:
         time.sleep(10)
-        #r = c.getUrlContent(url = url['url'])
-        r = requests.get(url = url['url'])
+        # r = c.getUrlContent(url = url['url'])
+        r = requests.get(url=url['url'])
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
         for product in products:
-            sendMessage(exchangeName, queueName, getProduct(product,url['category']), channel)
+            sendMessage(exchangeName, queueName, getProduct(product, url['category']), channel)
             logger.debug(getProduct(product, url['category']))
-            #break
-        #break
+            # break
+        # break
     connection.close()
     return None
 
