@@ -15,8 +15,5 @@ requirements.txt
 test*
 venv
 *.tar
-<<<<<<< Updated upstream
 stem01.py
-=======
-tescData.txt
->>>>>>> Stashed changes
+*.tar.gz
