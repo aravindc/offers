@@ -9,6 +9,7 @@ from messageq import openConnection
 from messageq import sendMessage
 from messageq import messageToFile
 from lxml import html
+import httpx
 
 logging.basicConfig(level=logging.INFO)
 LOG_FILE = '/opt/offers/logs/TESC_' + datetime.now().strftime("%Y%m%d") + '.log'
@@ -69,8 +70,11 @@ def genCategoryUrlArray():
     tesco_start_url = []
     base_url = 'https://www.tesco.com'
     tesc_cat_format_url = '/all?viewAll=promotion&promotion=offers&count=48&page={0}'
-    grocery_html = requests.get(
-        url='https://www.tesco.com/groceries/en-GB/shop/', headers=headers, timeout=10)
+    # grocery_html = requests.get(
+    #     url='https://www.tesco.com/groceries/en-GB/shop/', headers=headers, timeout=10)
+    client = httpx.Client(http2=True)
+    grocery_html = client.get(
+        url='https://www.tesco.com/groceries/en-GB/shop/', headers=headers, timeout=10)    
     grocery_sub_nav_links = '//div[@class="current"]/ul[@class="list"]/li/a/@href'
     grocery_html_data = html.fromstring(grocery_html.text)
     category_links = grocery_html_data.xpath(grocery_sub_nav_links)
@@ -155,9 +159,11 @@ def getProduct(Offertag, Category):
 def getOffers(Urls):
     # channel, connection = openConnection(exchangeName, queueName)
     product_grid = '//div[@class="product-lists"]//ul[@class="product-list grid"]/li'
+    client = httpx.Client(http2=True)
     for url in Urls:
         # time.sleep(10)
-        r = requests.get(url['category_offer_url'], headers=headers, timeout=10)
+        # r = requests.get(url['category_offer_url'], headers=headers, timeout=10)
+        r = client.get(url['category_offer_url'], headers=headers, timeout=10)
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
         for product in products:
