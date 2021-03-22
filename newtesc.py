@@ -1,9 +1,9 @@
-import os
+# import os
 import logging
-import requests
-import lxml.html
+# import requests
+# import lxml.html
 import math
-import time
+# import time
 from datetime import datetime
 from messageq import openConnection
 from messageq import sendMessage
@@ -82,7 +82,8 @@ def genCategoryUrlArray():
         transform_url = category_link.replace('?include-children=true', '')
         category = transform_url.split('/')[4]
         cat_link = transform_url + format(tesc_cat_format_url, '1')
-        r = requests.get(base_url+cat_link, timeout=10)
+        # r = requests.get(base_url+cat_link, timeout=10)
+        r = client.get(base_url+cat_link, headers=headers, timeout=10)
         data = html.fromstring(r.text)
         output = data.xpath(
             '//div[@class="items-count__filter-caption"]//text()')
