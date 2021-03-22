@@ -59,7 +59,7 @@ def genCategoryUrlArray():
     base_url = 'https://www.tesco.com'
     tesc_cat_format_url = '/all?viewAll=promotion&promotion=offers&count=48&page={0}'
     grocery_html = requests.get(
-        url='https://www.tesco.com/groceries/en-GB/shop/')
+        url='https://www.tesco.com/groceries/en-GB/shop/', timeout=10)
     grocery_sub_nav_links = '//div[@class="current"]/ul[@class="list"]/li/a/@href'
     grocery_html_data = html.fromstring(grocery_html.text)
     category_links = grocery_html_data.xpath(grocery_sub_nav_links)
@@ -67,7 +67,7 @@ def genCategoryUrlArray():
         transform_url = category_link.replace('?include-children=true', '')
         category = transform_url.split('/')[4]
         cat_link = transform_url + format(tesc_cat_format_url, '1')
-        r = requests.get(base_url+cat_link)
+        r = requests.get(base_url+cat_link, timeout=10)
         data = html.fromstring(r.text)
         output = data.xpath(
             '//div[@class="items-count__filter-caption"]//text()')
@@ -144,7 +144,7 @@ def getOffers(Urls):
     product_grid = '//div[@class="product-lists"]//ul[@class="product-list grid"]/li'
     for url in Urls:
         #time.sleep(10)
-        r = requests.get(url['category_offer_url'])
+        r = requests.get(url['category_offer_url'], timeout=10)
         tree = html.fromstring(r.content)
         products = tree.xpath(product_grid)
         for product in products:

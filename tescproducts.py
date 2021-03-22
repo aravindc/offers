@@ -5,6 +5,7 @@ import time
 import uuid
 import math
 import hashlib
+import httpx
 from lxml import html
 from fake_useragent import UserAgent
 from datetime import datetime
@@ -34,8 +35,10 @@ def getCsrfToken(clientSession):
     URL = 'https://www.tesco.com/groceries/en-GB/shop/fresh-food/all'
     header_data = {'User-Agent': user_agent}
     logger.debug(header_data)
-    response = clientSession.get(URL, headers=header_data)
+    response = clientSession.get(URL, headers=header_data, timeout=10)
     totalhtml = html.fromstring(response.text)
+    logger.info(response.text)
+    logger.info(totalhtml.xpath('//body/@data-csrf-token')[0])
     return totalhtml.xpath('//body/@data-csrf-token')[0]
 
 # Generate Unique Hash using UUID
@@ -56,7 +59,8 @@ def getCategoryCount(clientSession, categoryName):
 def getProducts(clientSession):
     productArray = []
     header_data = {'x-csrf-token': getCsrfToken(
-       clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}    
+       clientSession), 'User-Agent': user_agent, 'Content-Type': 'application/json'}
+    logger.debug('Header Data: {}'.format(header_data))
     for supercat in supercats:
         categoryCount = getCategoryCount(clientSession, supercat)
         logger.info(categoryCount)
@@ -87,8 +91,10 @@ def generateBodyData(categoryName, pageNum):
 
 
 if __name__ == '__main__':
-    clientSession = requests.Session()
+    # clientSession = requests.Session()
+    clientSession = httpx.Client(http2=True)
     channel, connection = openConnection(exchangeName, queueName)
+    logger.debug('About to get products...')
     getProducts(clientSession)
 
 
